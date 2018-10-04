@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/j58qe769ym2e7ffs?svg=true)](https://ci.appveyor.com/project/madskristensen/pkgdeflanguage)
 
-Download this extension from the [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.BrowserLinkInspector2017)
+Download this extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.PkgdefLanguage)
 or get the [CI build](http://vsixgallery.com/extension/06278dd5-5d9d-4f27-a3e8-cd619b101a50/).
 
 --------------------------------------
