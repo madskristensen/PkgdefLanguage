@@ -1,6 +1,5 @@
-﻿; Replace "TextmateSample" with a name of your choice.
-[$RootKey$\TextMate\Repositories]
-"TextmateSample"="$PackageFolder$\Grammars"
+﻿[$RootKey$\TextMate\Repositories]
+"Pkgdef"="$PackageFolder$\Grammars"
 
 [$RootKey$\ShellFileAssociations\.pkgdef]
 "DefaultIconMoniker"="KnownMonikers.ConfigurationEditor"
