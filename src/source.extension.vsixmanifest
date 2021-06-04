@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="06278dd5-5d9d-4f27-a3e8-cd619b101a50" Version="1.0.9999" Language="en-US" Publisher="Mads Kristensen" />
+        <Identity Id="06278dd5-5d9d-4f27-a3e8-cd619b101a50" Version="1.1.12" Language="en-US" Publisher="Mads Kristensen" />
         <DisplayName>Pkgdef Language</DisplayName>
         <Description xml:space="preserve">Basic language support for .pkgdef and .pkgundef files</Description>
         <MoreInfo>https://github.com/madskristensen/PkgdefLanguage</MoreInfo>
@@ -12,9 +12,13 @@
     </Metadata>
     <Installation AllUsers="true">
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0, 17.0)" />
+      <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+        <ProductArchitecture>amd64</ProductArchitecture>
+      </InstallationTarget>
     </Installation>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="Grammars.pkgdef" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="Snippets\snippets.pkgdef" />
     </Assets>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" DisplayName="Visual Studio core editor" />
