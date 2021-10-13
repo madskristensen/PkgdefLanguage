@@ -1,6 +1,9 @@
 ﻿[$RootKey$\TextMate\Repositories]
 "Pkgdef"="$PackageFolder$\Syntaxes"
 
+[$RootKey$\TextMate\LanguageConfiguration\GrammarMapping]
+"source.pkgdef"="$PackageFolder$\language-configuration.json"
+
 [$RootKey$\ShellFileAssociations\.pkgdef]
 "DefaultIconMoniker"="KnownMonikers.ConfigurationEditor"
 [$RootKey$\ShellFileAssociations\.pkgundef]
