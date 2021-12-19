@@ -46,7 +46,7 @@ jobs:
       with:
         nuget: 'false'
         sdk: 'false'
-        msbuild: 'false'
+        msbuild: 'true'
 
     - name: Increment VSIX version
       id: vsix_version
