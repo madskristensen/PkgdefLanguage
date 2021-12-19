@@ -56,7 +56,7 @@ jobs:
         vsix-token-source-file: src\source.extension.cs
 
     - name: Build
-      run: msbuild /p:Configuration=Release /p:DeployExtension=false /v:m -restore /p:OutDir=.\built
+      run: msbuild /p:Configuration=Release /p:DeployExtension=false /v:m -restore
 
     #- name: Test
     #  uses: zyborg/dotnet-tests-report@v1
@@ -71,7 +71,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}.vsix
-        path: ./built/**/*.vsix
+        path: ./**/*.vsix
 
   publish:
     if: github.event_name == 'push'
