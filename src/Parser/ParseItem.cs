@@ -9,7 +9,6 @@ namespace PkgdefLanguage
         {
             Start = start;
             Text = text;
-            TextExcludingLineBreaks = text.TrimEnd();
             Document = document;
             Type = type;
         }
@@ -19,15 +18,12 @@ namespace PkgdefLanguage
         public int Start { get; }
 
         public virtual string Text { get; protected set; }
-        public virtual string TextExcludingLineBreaks { get; protected set; }
 
         public Document Document { get; }
 
         public virtual int End => Start + Text.Length;
-        public virtual int EndExcludingLineBreaks => Start + TextExcludingLineBreaks.Length;
 
         public virtual int Length => End - Start;
-        public virtual int LengthExcludingLineBreaks => EndExcludingLineBreaks - Start;
 
         public List<Reference> References { get; } = new List<Reference>();
 
