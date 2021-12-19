@@ -10,6 +10,7 @@ using RestClientVS;
 
 namespace PkgdefLanguage
 {
+    [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
