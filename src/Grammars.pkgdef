@@ -1,7 +1,0 @@
-﻿[$RootKey$\TextMate\Repositories]
-"Pkgdef"="$PackageFolder$\Syntaxes"
-
-[$RootKey$\ShellFileAssociations\.pkgdef]
-"DefaultIconMoniker"="KnownMonikers.ConfigurationEditor"
-[$RootKey$\ShellFileAssociations\.pkgundef]
-"DefaultIconMoniker"="KnownMonikers.ConfigurationEditor"

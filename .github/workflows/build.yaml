@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Build"
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+      - '**/*.gitattributes'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+      - '**/*.gitattributes'
+  workflow_dispatch:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+      - '**/*.gitattributes'
+      
+jobs:
+  build:
+    outputs:
+      version: ${{ steps.vsix_version.outputs.version-number }}
+    name: Build 
+    runs-on: windows-2022
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: true
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
+      DOTNET_MULTILEVEL_LOOKUP: 0
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET build dependencies
+      uses: timheuer/bootstrap-dotnet@v1
+      with:
+        nuget: 'false'
+
+    - name: Increment VSIX version
+      id: vsix_version
+      uses: timheuer/vsix-version-stamp@v1
+      with:
+        manifest-file: src\source.extension.vsixmanifest
+        vsix-token-source-file: src\source.extension.cs
+
+    - name: Build
+      run: msbuild /p:Configuration=Release /v:m -restore /p:OutDir=../../built
+
+    #- name: Test
+    #  uses: zyborg/dotnet-tests-report@v1
+    #  with:
+    #    project_path: test\RestClientTest\RestClientTest.csproj
+    #    report_name: restclient_tests
+    #    report_title: RestClient Tests
+    #    github_token: ${{ secrets.GITHUB_TOKEN }}
+    #    set_check_status_from_test_outcome: true
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}.vsix
+        path: built/**/*.vsix
+
+  publish:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Download Package artifact
+        uses: actions/download-artifact@v2 
+        with:
+          name: ${{ github.event.repository.name }}.vsix
+
+      - name: Upload to Open VSIX
+        uses: timheuer/openvsixpublish@v1
+        with:
+          vsix-file: ${{ github.event.repository.name }}.vsix
+
+      - name: Tag and Release
+        if: ${{ contains(github.event.head_commit.message, '[release]') }}
+        id: tag_release
+        uses: softprops/action-gh-release@v0.1.13
+        with:
+          body: Release ${{ needs.build.outputs.version }}
+          tag_name: ${{ needs.build.outputs.version }}
+          files: |
+            **/*.vsix
