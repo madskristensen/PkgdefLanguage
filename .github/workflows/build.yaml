@@ -45,6 +45,8 @@ jobs:
       uses: timheuer/bootstrap-dotnet@v1
       with:
         nuget: 'false'
+        sdk: 'false'
+        msbuild: 'false'
 
     - name: Increment VSIX version
       id: vsix_version
@@ -54,7 +56,7 @@ jobs:
         vsix-token-source-file: src\source.extension.cs
 
     - name: Build
-      run: msbuild /p:Configuration=Release /v:m -restore /p:OutDir=../../built
+      run: msbuild /p:Configuration=Release /p:DeployExtension=false /v:m -restore /p:OutDir=../../built
 
     #- name: Test
     #  uses: zyborg/dotnet-tests-report@v1

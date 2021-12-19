@@ -14,11 +14,11 @@ namespace PkgdefLanguage
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+
     [ProvideLanguageService(typeof(Language), Language.LanguageName, 0, MatchBraces = true, MatchBracesAtCaret = true, EnableAsyncCompletion = true, EnableCommenting = true, ShowCompletion = true, ShowMatchingBrace = true)]
     [ProvideLanguageExtension(typeof(Language), Language.FileExtension)]
     [ProvideFileIcon(Language.FileExtension, "KnownMonikers.RegistrationScript")]
     [ProvideBraceCompletion(Language.LanguageName)]
-
     [ProvideEditorFactory(typeof(Language), 0, false, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
     [ProvideEditorLogicalView(typeof(Language), VSConstants.LOGVIEWID.TextView_string, IsTrusted = true)]
     public sealed class PkgdefPackage : ToolkitPackage
