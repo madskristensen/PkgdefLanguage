@@ -13,7 +13,17 @@ This extension provides basic language support for .pkgdef and .pkgundef files i
 ## Syntax highlighting
 Syntax highligting makes it easy to parse the document. Here's what it looks like:
 
-![Colorization](art/colorization.png)
+![Colorization](art/colorization.png?)
+
+## IntelliSense
+Full completion provided for variables.
+
+![Intellisense](art/intellisense.png)
+
+## Outlining
+Collapse sections for better overview of the document.
+
+![Outlining](art/outlining.png)
 
 Notice how only comments starting with a semicolon is correctly identified as a comment. 
 
