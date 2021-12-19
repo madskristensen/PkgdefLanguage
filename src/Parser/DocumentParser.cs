@@ -8,7 +8,7 @@ namespace PkgdefLanguage
 {
     public partial class Document
     {
-        private static readonly Regex _regexProperty = new(@"^(?<name>.+)(\s)*(?<equals>=)\s*(?<value>.+)", RegexOptions.Compiled);
+        private static readonly Regex _regexProperty = new(@"^(?<name>(@|"".+""))(\s)*(?<equals>=)\s*(?<value>.+)", RegexOptions.Compiled);
         private static readonly Regex _regexRef = new(@"(?<open>\$)(?<value>[\w]+)(?<close>\$)", RegexOptions.Compiled);
 
         public bool IsParsing { get; private set; }
@@ -23,21 +23,16 @@ namespace PkgdefLanguage
 
                 try
                 {
-                    List<ParseItem> tokens = new();
+                    List<ParseItem> items = new();
 
                     foreach (var line in _lines)
                     {
-                        IEnumerable<ParseItem> current = ParseLine(start, line, tokens);
-
-                        if (current != null)
-                        {
-                            tokens.AddRange(current);
-                        }
-
+                        IEnumerable<ParseItem> current = ParseLine(start, line, items);
+                        items.AddRange(current);
                         start += line.Length;
                     }
 
-                    Items = tokens;
+                    Items = items;
 
                     OrganizeItems();
                     ValidateDocument();
@@ -52,18 +47,13 @@ namespace PkgdefLanguage
 
         private IEnumerable<ParseItem> ParseLine(int start, string line, List<ParseItem> tokens)
         {
-            var trimmedLine = line.Trim();
+            var trimmedLine = line.TrimEnd();
             List<ParseItem> items = new();
 
             // Comment
             if (trimmedLine.StartsWith(Constants.CommentChar.ToString()))
             {
                 items.Add(ToParseItem(line, start, ItemType.Comment, false));
-            }
-            // Empty line
-            else if (string.IsNullOrWhiteSpace(line))
-            {
-                items.Add(ToParseItem(line, start, ItemType.EmptyLine, false));
             }
             // Registry key
             else if (trimmedLine.StartsWith("[", StringComparison.Ordinal))
@@ -79,7 +69,7 @@ namespace PkgdefLanguage
                 items.Add(ToParseItem(matchHeader, start, "value", true));
             }
             // Unknown
-            else
+            else if (trimmedLine.Length > 0)
             {
                 items.Add(new ParseItem(start, line, this, ItemType.Unknown));
             }
@@ -114,7 +104,7 @@ namespace PkgdefLanguage
         private ParseItem ToParseItem(Match match, int start, string groupName, bool supportsVariableReferences = true)
         {
             Group group = match.Groups[groupName];
-            ItemType type = group.Value.StartsWith("\"") ? ItemType.PropertyName : ItemType.PropertyValue;
+            ItemType type = group.Value.StartsWith("\"") ? ItemType.String : ItemType.Literal;
             return ToParseItem(group.Value, start + group.Index, type, supportsVariableReferences);
         }
 
@@ -146,6 +136,7 @@ namespace PkgdefLanguage
                 if (item.Type == ItemType.RegistryKey)
                 {
                     var trimmedText = item.Text.Trim();
+
                     if (!trimmedText.EndsWith("]"))
                     {
                         item.Errors.Add("Unclosed registry key entry. Add the missing ] character");
@@ -172,6 +163,7 @@ namespace PkgdefLanguage
         {
             List<Entry> entries = new();
             Entry currentEntry = null;
+            ParseItem propName = null;
 
             foreach (ParseItem item in Items)
             {
@@ -180,10 +172,19 @@ namespace PkgdefLanguage
                     currentEntry = new Entry(item);
                     entries.Add(currentEntry);
                 }
-                else if (item.Type == ItemType.PropertyName)
+                else if (item.Type == ItemType.String || item.Type == ItemType.Literal)
                 {
-                    var property = new Property(item, item.Next);
-                    currentEntry?.Properties.Add(property);
+                    if (propName == null)
+                    {
+                        propName = item;
+
+                    }
+                    else
+                    {
+                        var property = new Property(propName, item);
+                        currentEntry?.Properties.Add(property);
+                        propName = null;
+                    }
                 }
             }
 

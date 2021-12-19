@@ -33,8 +33,8 @@ namespace PkgdefLanguage
 
             _map ??= new Dictionary<ItemType, IClassificationType> {
                 { ItemType.RegistryKey, registry.GetClassificationType(PredefinedClassificationTypeNames.SymbolDefinition) },
-                { ItemType.PropertyName, registry.GetClassificationType(PredefinedClassificationTypeNames.String) },
-                { ItemType.PropertyValue, registry.GetClassificationType(PredefinedClassificationTypeNames.Literal)},
+                { ItemType.String, registry.GetClassificationType(PredefinedClassificationTypeNames.String) },
+                { ItemType.Literal, registry.GetClassificationType(PredefinedClassificationTypeNames.Literal)},
                 { ItemType.Comment, registry.GetClassificationType(PredefinedClassificationTypeNames.Comment)},
                 { ItemType.ReferenceBraces, registry.GetClassificationType(PredefinedClassificationTypeNames.SymbolDefinition)},
                 { ItemType.ReferenceName, registry.GetClassificationType(PredefinedClassificationTypeNames.SymbolReference)},

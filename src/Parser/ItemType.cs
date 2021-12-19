@@ -3,12 +3,11 @@
     public enum ItemType
     {
         Comment,
-        EmptyLine,
         ReferenceBraces,
         ReferenceName,
         RegistryKey,
-        PropertyName,
-        PropertyValue,
+        String,
+        Literal,
         Unknown,
     }
 }

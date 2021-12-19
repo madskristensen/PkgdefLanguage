@@ -10,5 +10,10 @@
 
         public ParseItem Name { get; }
         public ParseItem Value { get; }
+
+        public override string ToString()
+        {
+            return Name.Text + "=" + Value.Text;
+        }
     }
 }
