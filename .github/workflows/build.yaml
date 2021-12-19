@@ -70,7 +70,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ github.event.repository.name }} v${{ needs.build.outputs.version }}.vsix
+        name: ${{ github.event.repository.name }} v${{ steps.vsix_version.outputs.version-number }}.vsix
         path: _built/**/*.vsix
 
   publish:
