@@ -72,7 +72,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Community.VisualStudio.Toolkit.17">
+    <PackageReference Include="Community.VisualStudio.Toolkit.17" ExcludeAssets="runtime">
       <Version>17.0.339</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
@@ -124,6 +124,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />

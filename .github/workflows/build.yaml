@@ -7,22 +7,16 @@ on:
       - master
     paths-ignore:
       - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
   pull_request:
     branches:
       - master
     paths-ignore:
       - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
   workflow_dispatch:
     branches:
       - master
     paths-ignore:
       - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
       
 jobs:
   build:
