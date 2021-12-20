@@ -4,9 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PkgdefLanguage.Test
 {
-#pragma warning disable IDE1006 // Naming Styles
-
     [TestClass]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
     public class ParseTest
     {
         [TestMethod]
@@ -42,5 +41,4 @@ namespace PkgdefLanguage.Test
             Assert.AreEqual(2, doc.Items.Where(i => i.Type == ItemType.Comment).Count());
         }
     }
-#pragma warning restore IDE1006 // Naming Styles
 }
