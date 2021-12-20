@@ -1,7 +1,7 @@
-﻿using System;
+﻿global using Task = System.Threading.Tasks.Task;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -19,7 +19,7 @@ namespace PkgdefLanguage
     [ProvideLanguageExtension(typeof(Language), Language.FileExtension)]
     [ProvideFileIcon(Language.FileExtension, "KnownMonikers.RegistrationScript")]
     [ProvideBraceCompletion(Language.LanguageName)]
-    [ProvideEditorFactory(typeof(Language), 0, false, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
+    [ProvideEditorFactory(typeof(Language), 0, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
     [ProvideEditorLogicalView(typeof(Language), VSConstants.LOGVIEWID.TextView_string, IsTrusted = true)]
     public sealed class PkgdefPackage : ToolkitPackage
     {

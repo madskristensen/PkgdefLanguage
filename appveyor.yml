@@ -1,15 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/appveyor.json
 image: Visual Studio 2022
+configuration: release
 
 install:
-- ps: (new-object Net.WebClient).DownloadString("https://raw.github.com/madskristensen/ExtensionScripts/master/AppVeyor/vsix.ps1") | iex
+- ps: (new-object Net.WebClient).DownloadString("https://madsk.net/vsixbuildscript") | iex
 
 before_build:
   - ps: Vsix-IncrementVsixVersion | Vsix-UpdateBuildVersion
   - ps: Vsix-TokenReplacement src\source.extension.cs 'Version = "([0-9\\.]+)"' 'Version = "{version}"'
 
 build_script:
-  - nuget restore -Verbosity quiet
-  - msbuild /p:configuration=Release /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m
+  - msbuild /v:m -restore
 
-#after_test:
-#  - ps: Vsix-PushArtifacts | Vsix-PublishToGallery
+deploy_script:
+  - ps: Vsix-PushArtifacts #| Vsix-PublishToGallery
