@@ -61,8 +61,10 @@ jobs:
     #    github_token: ${{ secrets.GITHUB_TOKEN }}
         #set_check_status_from_test_outcome: true
 
-    - name: Test
+    - name: Setup test
       uses: darenm/Setup-VSTest@v1
+
+    - name: Test
       run: vstest.console.exe /Platform:x64 test\bing\release\PkgdefLanguage.Test.dll
 
     - name: Upload artifact
