@@ -7,7 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PkgdefLanguage", "src\Pkgde
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{364CDDAA-3796-4BA2-AF0D-F028616434C0}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
 		.github\workflows\build.yaml = .github\workflows\build.yaml
 		README.md = README.md
 	EndProjectSection
