@@ -8,8 +8,8 @@ using Microsoft.VisualStudio.Utilities;
 namespace PkgdefLanguage
 {
     [Export(typeof(IAsyncQuickInfoSourceProvider))]
-    [ContentType(Language.LanguageName)]
-    [Name(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
     internal sealed class QuickInfoSourceProvider : IAsyncQuickInfoSourceProvider
     {
         public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer buffer) =>

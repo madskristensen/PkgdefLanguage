@@ -65,5 +65,19 @@ namespace PkgdefLanguage.Test
             Assert.AreEqual(2, doc.Items.Count);
             Assert.AreEqual(2, doc.Items.Where(i => i.Type == ItemType.Comment).Count());
         }
+
+        [TestMethod]
+        public async Task InvalidPropertyName()
+        {
+            var lines = new[] { "[test]\r\n",
+                         "\"@\"=\"test\"",
+            };
+
+            var doc = Document.FromLines(lines);
+            await doc.WaitForParsingCompleteAsync();
+            ParseItem prop = doc.Entries[0].Properties[0].Name;
+
+            Assert.IsFalse(prop.IsValid);
+        }
     }
 }

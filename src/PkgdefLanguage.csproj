@@ -103,6 +103,7 @@
     <Compile Include="Language\StructureTagger.cs" />
     <Compile Include="Parser\Document.cs" />
     <Compile Include="Parser\DocumentParser.cs" />
+    <Compile Include="Parser\DocumentValidator.cs" />
     <Compile Include="Parser\ItemType.cs" />
     <Compile Include="Parser\ParseItem.cs" />
     <Compile Include="Parser\Property.cs" />

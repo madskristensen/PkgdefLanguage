@@ -12,8 +12,8 @@ namespace PkgdefLanguage
 {
     [Export(typeof(ITaggerProvider))]
     [TagType(typeof(IClassificationTag))]
-    [ContentType(Language.LanguageName)]
-    [Name(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
     internal class ClassificationTaggerProvider : ITaggerProvider
     {
         [Import] internal IClassificationTypeRegistryService _classificationRegistry = null;

@@ -6,8 +6,8 @@ using Microsoft.VisualStudio.Utilities;
 namespace PkgdefLanguage
 {
     [Export(typeof(IAsyncCompletionCommitManagerProvider))]
-    [ContentType(Language.LanguageName)]
-    [Name(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
     internal class CompletionCommitManager : CompletionCommitManagerBase
     {
         public override IEnumerable<char> CommitChars => new char[] { ' ', '\'', '"', ',', '.', ';', ':' };

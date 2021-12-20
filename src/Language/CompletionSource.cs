@@ -18,8 +18,8 @@ using Microsoft.VisualStudio.Utilities;
 namespace PkgdefLanguage
 {
     [Export(typeof(IAsyncCompletionSourceProvider))]
-    [ContentType(Language.LanguageName)]
-    [Name(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
     internal class CompletionSourceProvider : IAsyncCompletionSourceProvider
     {
         [Import] internal ITextStructureNavigatorSelectorService _structureNavigator = null;
@@ -84,8 +84,8 @@ namespace PkgdefLanguage
             // We don't trigger completion when user typed
             if (char.IsNumber(trigger.Character)         // a number
                 || char.IsPunctuation(trigger.Character) // punctuation
+                || char.IsSymbol(trigger.Character)      // punctuation
                 || trigger.Character == '\n'             // new line
-                || trigger.Character == Constants.CommentChar
                 || trigger.Reason == CompletionTriggerReason.Backspace
                 || trigger.Reason == CompletionTriggerReason.Deletion)
             {
@@ -107,9 +107,12 @@ namespace PkgdefLanguage
 
             SnapshotSpan tokenSpan = FindTokenSpanAtPosition(triggerLocation);
 
-            if (triggerLocation.GetContainingLine().GetText().StartsWith(Constants.CommentChar.ToString(), StringComparison.Ordinal))
+            foreach (var commentChar in Constants.CommentChars)
             {
-                return CompletionStartData.DoesNotParticipateInCompletion;
+                if (triggerLocation.GetContainingLine().GetText().StartsWith(commentChar, StringComparison.Ordinal))
+                {
+                    return CompletionStartData.DoesNotParticipateInCompletion;
+                }
             }
 
             return new CompletionStartData(CompletionParticipation.ProvidesItems, tokenSpan);

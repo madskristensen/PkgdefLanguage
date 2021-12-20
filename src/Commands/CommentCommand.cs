@@ -12,7 +12,7 @@ namespace PkgdefLanguage
 {
     [Export(typeof(ICommandHandler))]
     [Name(nameof(CommentCommand))]
-    [ContentType(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
     [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
     public class CommentCommand : ICommandHandler<CommentSelectionCommandArgs>
     {
@@ -25,7 +25,7 @@ namespace PkgdefLanguage
 
             foreach (ITextViewLine line in lines.Reverse())
             {
-                args.TextView.TextBuffer.Insert(line.Start.Position, Constants.CommentChar.ToString());
+                args.TextView.TextBuffer.Insert(line.Start.Position, Constants.CommentChars[0]);
             }
 
             return true;

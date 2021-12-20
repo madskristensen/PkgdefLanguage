@@ -8,17 +8,14 @@ namespace PkgdefLanguage
     [Guid(PackageGuids.EditorFactoryString)]
     public class Language : LanguageBase
     {
-        public const string LanguageName = "Pkgdef";
-        public const string FileExtension = ".pkgdef";
-
         public Language(object site) : base(site)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
         }
 
-        public override string Name => LanguageName;
+        public override string Name => Constants.LanguageName;
 
-        public override string[] FileExtensions => new[] { FileExtension };
+        public override string[] FileExtensions => new[] { Constants.PkgDefExt, Constants.PkgUndefExt };
 
         public override void SetDefaultPreferences(LanguagePreferences preferences)
         {

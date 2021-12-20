@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace PkgdefLanguage
 {
     public partial class Document
     {
-        private static readonly Regex _regexProperty = new(@"^(?<name>(@|"".+""))(\s)*(?<equals>=)\s*(?<value>.+)", RegexOptions.Compiled);
+        private static readonly Regex _regexProperty = new(@"^(?<name>.+)(\s)*(?<equals>=)\s*(?<value>.+)", RegexOptions.Compiled);
         private static readonly Regex _regexRef = new(@"(?<open>\$)(?<value>[\w]+)(?<close>\$)", RegexOptions.Compiled);
 
         public bool IsParsing { get; private set; }
@@ -51,7 +49,7 @@ namespace PkgdefLanguage
             List<ParseItem> items = new();
 
             // Comment
-            if (trimmedLine.StartsWith(Constants.CommentChar.ToString()))
+            if (trimmedLine.StartsWith(Constants.CommentChars[0]) || trimmedLine.StartsWith(Constants.CommentChars[1]))
             {
                 items.Add(ToParseItem(line, start, ItemType.Comment, false));
             }
@@ -65,8 +63,9 @@ namespace PkgdefLanguage
             // Property
             else if (tokens.Count > 0 && IsMatch(_regexProperty, trimmedLine, out Match matchHeader))
             {
-                items.Add(ToParseItem(matchHeader, start, "name"));
-                items.Add(ToParseItem(matchHeader, start, "value", true));
+                items.Add(ToParseItem(matchHeader, start, "name", false));
+                items.Add(ToParseItem(matchHeader, start, "equals", ItemType.Operator, false));
+                items.Add(ToParseItem(matchHeader, start, "value"));
             }
             // Unknown
             else if (trimmedLine.Length > 0)
@@ -119,43 +118,6 @@ namespace PkgdefLanguage
                 var reference = new Reference(open, value, close);
 
                 token.References.Add(reference);
-            }
-        }
-
-        private void ValidateDocument()
-        {
-            foreach (ParseItem item in Items)
-            {
-                // Unknown symbols
-                if (item.Type == ItemType.Unknown)
-                {
-                    item.Errors.Add("Unknown token at this location.");
-                }
-
-                // Registry key
-                if (item.Type == ItemType.RegistryKey)
-                {
-                    var trimmedText = item.Text.Trim();
-
-                    if (!trimmedText.EndsWith("]"))
-                    {
-                        item.Errors.Add("Unclosed registry key entry. Add the missing ] character");
-                    }
-
-                    if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
-                    {
-                        item.Errors.Add("Use the backslash character as delimiter instead of forward slash.");
-                    }
-                }
-
-                // Unknown variables
-                if (item.Type == ItemType.ReferenceName)
-                {
-                    if (!CompletionCatalog.Variables.Any(v => v.Key.Equals(item.Text, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        item.Errors.Add($"The variable \"{item.Text}\" doens't exist.");
-                    }
-                }
             }
         }
 

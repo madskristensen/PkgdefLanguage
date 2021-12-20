@@ -12,7 +12,7 @@ namespace PkgdefLanguage
 {
     [Export(typeof(ICommandHandler))]
     [Name(nameof(CommentCommand))]
-    [ContentType(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
     [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
     public class UncommentCommand : ICommandHandler<UncommentSelectionCommandArgs>
     {
@@ -26,7 +26,7 @@ namespace PkgdefLanguage
             foreach (ITextViewLine line in lines.Reverse())
             {
                 var span = Span.FromBounds(line.Start, line.End);
-                var text = args.TextView.TextBuffer.CurrentSnapshot.GetText(span).TrimStart(Constants.CommentChar);
+                var text = args.TextView.TextBuffer.CurrentSnapshot.GetText(span).TrimStart(Constants.CommentChars[0][0]);
                 args.TextView.TextBuffer.Replace(span, text);
             }
 

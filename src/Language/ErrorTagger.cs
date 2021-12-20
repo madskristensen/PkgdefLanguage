@@ -11,8 +11,8 @@ namespace PkgdefLanguage
 {
     [Export(typeof(ITaggerProvider))]
     [TagType(typeof(IErrorTag))]
-    [ContentType(Language.LanguageName)]
-    [Name(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
     public class RestErrorTaggerProvider : ITaggerProvider
     {
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag =>

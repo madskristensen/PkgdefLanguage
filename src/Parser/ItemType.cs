@@ -8,6 +8,7 @@
         RegistryKey,
         String,
         Literal,
+        Operator,
         Unknown,
     }
 }

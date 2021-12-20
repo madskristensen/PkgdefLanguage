@@ -10,8 +10,8 @@ namespace PkgdefLanguage
     [BracePair('{', '}')]
     [BracePair('"', '"')]
     [BracePair('$', '$')]
-    [ContentType(Language.LanguageName)]
-    [Name(Language.LanguageName)]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
     internal sealed class BraceCompletion : BraceCompletionBase
     {
 
