@@ -9,7 +9,7 @@ namespace PkgdefLanguage.Test
     public class ParseTest
     {
         [TestMethod]
-        public async Task SimpleEntry()
+        public async Task SingleEntry()
         {
             var lines = new[] { "[test]\r\n",
                                  "@=\"test\""
@@ -24,6 +24,30 @@ namespace PkgdefLanguage.Test
             Assert.AreEqual(1, entry.Properties.Count);
             Assert.AreEqual("@", entry.Properties.First().Name.Text);
             Assert.AreEqual(16, entry.End);
+        }
+
+        [TestMethod]
+        public async Task MultipleEntries()
+        {
+            var lines = new[] { "[test]\r\n",
+                         "@=\"test\"",
+                         "\"test\"=\"test\"",
+                         "[test]\r\n",
+                         "@=\"test\""
+            };
+
+            var doc = Document.FromLines(lines);
+            await doc.WaitForParsingCompleteAsync();
+
+            Assert.AreEqual(2, doc.Entries.Count);
+
+            Entry first = doc.Entries.First();
+            Entry second = doc.Entries.Last();
+
+            Assert.AreEqual(2, first.Properties.Count);
+            Assert.AreEqual(29, first.End);
+            Assert.AreEqual("@", second.Properties.First().Name.Text);
+            Assert.AreEqual(45, second.End);
         }
 
         [TestMethod]
