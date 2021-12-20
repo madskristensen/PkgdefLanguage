@@ -24,7 +24,4 @@ Collapse sections for better overview of the document.
 
 ![Outlining](art/outlining.png)
 
-Notice how only comments starting with a semicolon is correctly identified as a comment. 
-
-## License
-[Apache 2.0](LICENSE)
+Notice how only comments starting with a semicolon is correctly identified as a comment.

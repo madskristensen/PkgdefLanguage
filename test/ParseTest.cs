@@ -6,6 +6,7 @@ namespace PkgdefLanguage.Test
 {
     [TestClass]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
     public class ParseTest
     {
         [TestMethod]
