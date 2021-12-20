@@ -3,20 +3,11 @@ name: "Build"
 
 on:
   push:
-    branches:
-      - master
-    paths-ignore:
-      - '**/*.md'
+    branches: [master]
   pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - '**/*.md'
+    branches: [master]
   workflow_dispatch:
-    branches:
-      - master
-    paths-ignore:
-      - '**/*.md'
+    branches: [master]
       
 jobs:
   build:
@@ -24,6 +15,11 @@ jobs:
       version: ${{ steps.vsix_version.outputs.version-number }}
     name: Build 
     runs-on: windows-2022
+    env:
+      Configuration: Release
+      DeployExtension: False
+      VsixManifestPath: src\source.extension.vsixmanifest
+      VsixManifestSourcePath: src\source.extension.cs
       
     steps:
     - uses: actions/checkout@v2
@@ -39,11 +35,11 @@ jobs:
       id: vsix_version
       uses: timheuer/vsix-version-stamp@v1
       with:
-        manifest-file: src\source.extension.vsixmanifest
-        vsix-token-source-file: src\source.extension.cs
+        manifest-file: ${{ env.VsixManifestPath }}
+        vsix-token-source-file: ${{ env.VsixManifestSourcePath }}
 
     - name: Build
-      run: msbuild /p:Configuration=Release /p:DeployExtension=false /p:ZipPackageCompressionLevel=normal /v:m -restore /p:OutDir=../_built
+      run: msbuild /v:m -restore /p:OutDir=../_built
       
     - name: Setup test
       uses: darenm/Setup-VSTest@v1
