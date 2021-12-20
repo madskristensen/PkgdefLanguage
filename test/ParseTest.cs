@@ -4,6 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PkgdefLanguage.Test
 {
+#pragma warning disable IDE1006 // Naming Styles
+
     [TestClass]
     public class ParseTest
     {
@@ -40,4 +42,5 @@ namespace PkgdefLanguage.Test
             Assert.AreEqual(2, doc.Items.Where(i => i.Type == ItemType.Comment).Count());
         }
     }
+#pragma warning restore IDE1006 // Naming Styles
 }

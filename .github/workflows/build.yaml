@@ -56,10 +56,10 @@ jobs:
       uses: zyborg/dotnet-tests-report@v1
       with:
         project_path: test\PkgdefLanguage.Test.csproj
-        report_name: unit_tests
-        report_title: Unit Tests
+        report_name: pkgdef_tests
+        report_title: Pkgdef Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        set_check_status_from_test_outcome: true
+        #set_check_status_from_test_outcome: true
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
