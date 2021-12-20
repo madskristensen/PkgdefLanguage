@@ -62,7 +62,8 @@ jobs:
         #set_check_status_from_test_outcome: true
 
     - name: Test
-      run: '& "$(vswhere -property installationPath)\Common7\IDE\MSTest.exe" /help'
+      uses: darenm/Setup-VSTest@v1
+      run: vstest.console.exe /Platform:x64 test\bing\release\PkgdefLanguage.Test.dll
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
