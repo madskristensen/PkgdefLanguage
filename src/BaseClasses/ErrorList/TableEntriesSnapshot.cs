@@ -56,6 +56,10 @@ namespace PkgdefLanguage
                     content = _errors[index].Line;
                     break;
 
+                case StandardTableKeyNames.Column:
+                    content = _errors[index].Column;
+                    break;
+
                 case StandardTableKeyNames.ErrorCategory:
                     content = _errors[index].ErrorCategory;
                     break;

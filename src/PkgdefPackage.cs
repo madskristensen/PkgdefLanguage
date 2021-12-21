@@ -28,7 +28,7 @@ namespace PkgdefLanguage
         protected override Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             RegisterEditorFactory(new Language(this));
-            return base.InitializeAsync(cancellationToken, progress);
+            return Task.CompletedTask;
         }
     }
 }

@@ -19,6 +19,8 @@ namespace PkgdefLanguage
         /// </summary>
         public int Line { get; set; }
 
+        public int Column { get; set; }
+
         /// <summary>
         /// Error message.
         /// </summary>

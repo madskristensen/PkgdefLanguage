@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
@@ -71,7 +72,7 @@ namespace PkgdefLanguage
 
         private IEnumerable<ErrorListItem> CreateErrorListItem(ParseItem item)
         {
-            var lineNumber = _docView.TextBuffer.CurrentSnapshot.GetLineNumberFromPosition(item.Start);
+            ITextSnapshotLine line = _docView.TextBuffer.CurrentSnapshot.GetLineFromPosition(item.Start);
 
             foreach (var error in item.Errors)
             {
@@ -82,7 +83,8 @@ namespace PkgdefLanguage
                     Message = error,
                     ErrorCategory = "syntax",
                     Severity = __VSERRORCATEGORY.EC_WARNING,
-                    Line = lineNumber,
+                    Line = line.LineNumber,
+                    Column = item.Start - line.Start.Position,
                     BuildTool = Vsix.Name,
                 };
             }
