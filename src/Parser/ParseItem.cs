@@ -5,6 +5,7 @@ namespace PkgdefLanguage
 {
     public class ParseItem
     {
+        public List<string> _errors = new();
         public ParseItem(int start, string text, Document document, ItemType type)
         {
             Start = start;
@@ -27,13 +28,19 @@ namespace PkgdefLanguage
 
         public List<Reference> References { get; } = new List<Reference>();
 
-        public List<string> Errors = new();
+        public IEnumerable<string> Errors => _errors;
 
-        public bool IsValid => Errors.Count == 0;
+        public bool IsValid => _errors.Count == 0;
 
         public virtual bool Contains(int position)
         {
             return Start <= position && End >= position;
+        }
+
+        public void AddError(string error)
+        {
+            Document.IsValid = false;
+            _errors.Add(error);
         }
 
         public ParseItem Previous

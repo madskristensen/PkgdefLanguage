@@ -13,6 +13,8 @@ namespace PkgdefLanguage
             _ = ParseAsync();
         }
 
+        public bool IsValid { get; set; }
+
         public List<ParseItem> Items { get; private set; } = new List<ParseItem>();
 
         public List<Entry> Entries { get; private set; } = new();

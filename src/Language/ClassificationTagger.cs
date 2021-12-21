@@ -43,12 +43,7 @@ namespace PkgdefLanguage
 
         public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if (spans.Count == 0)
-            {
-                yield return null;
-            }
-
-            foreach (SnapshotSpan span in spans)
+            foreach (SnapshotSpan span in spans.Where(s => !s.IsEmpty))
             {
                 foreach (ParseItem item in _document.Items.Where(t => t.Start < span.End && t.End > span.Start))
                 {

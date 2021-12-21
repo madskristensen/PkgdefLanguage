@@ -83,15 +83,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseClasses\Attributes\ProvideBraceCompletionAttribute.cs" />
-    <Compile Include="BaseClasses\BraceCompletionBase.cs" />
-    <Compile Include="BaseClasses\CompletionCommitManagerBase.cs" />
-    <Compile Include="BaseClasses\DefaultAuthoringScope.cs" />
-    <Compile Include="BaseClasses\DefaultColorizer.cs" />
-    <Compile Include="BaseClasses\DefaultSource.cs" />
-    <Compile Include="BaseClasses\LanguageBase.cs" />
+    <Compile Include="BaseClasses\LanguageService\BraceCompletionBase.cs" />
+    <Compile Include="BaseClasses\LanguageService\CompletionCommitManagerBase.cs" />
+    <Compile Include="BaseClasses\LanguageService\DefaultAuthoringScope.cs" />
+    <Compile Include="BaseClasses\LanguageService\DefaultColorizer.cs" />
+    <Compile Include="BaseClasses\LanguageService\DefaultSource.cs" />
+    <Compile Include="BaseClasses\LanguageService\LanguageBase.cs" />
     <Compile Include="Commands\CommentCommand.cs" />
     <Compile Include="Commands\UncommentCommand.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Language\ErrorListManager.cs" />
+    <Compile Include="BaseClasses\ErrorList\ErrorListItem.cs" />
+    <Compile Include="BaseClasses\ErrorList\SinkManager.cs" />
+    <Compile Include="BaseClasses\ErrorList\TableDataSource.cs" />
+    <Compile Include="BaseClasses\ErrorList\TableEntriesSnapshot.cs" />
     <Compile Include="Language\BraceCompletion.cs" />
     <Compile Include="Language\ClassificationTagger.cs" />
     <Compile Include="Language\CompletionCatalog.cs" />
@@ -132,6 +137,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -7,12 +7,14 @@ namespace PkgdefLanguage
     {
         private void ValidateDocument()
         {
+            IsValid = true;
+
             foreach (ParseItem item in Items)
             {
                 // Unknown symbols
                 if (item.Type == ItemType.Unknown)
                 {
-                    item.Errors.Add("Unknown token at this location.");
+                    item.AddError("Unknown token at this location.");
                 }
 
                 // Registry key
@@ -22,12 +24,12 @@ namespace PkgdefLanguage
 
                     if (!trimmedText.EndsWith("]"))
                     {
-                        item.Errors.Add("Unclosed registry key entry. Add the missing ] character");
+                        item.AddError("Unclosed registry key entry. Add the missing ] character");
                     }
 
                     if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
                     {
-                        item.Errors.Add("Use the backslash character as delimiter instead of forward slash.");
+                        item.AddError("Use the backslash character as delimiter instead of forward slash.");
                     }
                 }
 
@@ -41,12 +43,12 @@ namespace PkgdefLanguage
                     {
                         if (name.Text == "\"@\"")
                         {
-                            name.Errors.Add("To set a registry key's default value, use '@' without quotation marks");
+                            name.AddError("To set a registry key's default value, use '@' without quotation marks");
                         }
                     }
                     else if (name?.Type == ItemType.Literal && name?.Text != "@")
                     {
-                        name.Errors.Add("Value names must be enclosed in quotation marks.");
+                        name.AddError("Value names must be enclosed in quotation marks.");
                     }
                 }
 
@@ -55,7 +57,7 @@ namespace PkgdefLanguage
                 {
                     if (!item.Text.EndsWith("\""))
                     {
-                        item.Errors.Add("Value names must be enclosed in quotation marks.");
+                        item.AddError("Value names must be enclosed in quotation marks.");
                     }
                 }
 
@@ -64,7 +66,7 @@ namespace PkgdefLanguage
                 {
                     if (!CompletionCatalog.Variables.Any(v => v.Key.Equals(reference.Value.Text, StringComparison.OrdinalIgnoreCase)))
                     {
-                        reference.Value.Errors.Add($"The variable \"{item.Text}\" doens't exist.");
+                        reference.Value.AddError($"The variable \"{reference.Value.Text}\" doens't exist.");
                     }
                 }
             }

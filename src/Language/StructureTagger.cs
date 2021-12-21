@@ -43,7 +43,7 @@ namespace PkgdefLanguage
 
         public IEnumerable<ITagSpan<IStructureTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if (spans.Count == 0 || !_structureTags.Any())
+            if (spans.Count == 0 || spans[0].IsEmpty || !_structureTags.Any())
             {
                 return null;
             }
@@ -55,18 +55,16 @@ namespace PkgdefLanguage
         {
             ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
             {
-                if (TagsChanged == null || _document.IsParsing)
+                if (TagsChanged != null && !_document.IsParsing)
                 {
-                    return Task.CompletedTask;
+                    ReParse();
+                    SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
+                    TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
                 }
-
-                _structureTags.Clear();
-                ReParse();
-                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length)));
 
                 return Task.CompletedTask;
             },
-                VsTaskRunContext.UIThreadIdlePriority).FireAndForget();
+                VsTaskRunContext.UIThreadBackgroundPriority).FireAndForget();
         }
 
         private void ReParse()
