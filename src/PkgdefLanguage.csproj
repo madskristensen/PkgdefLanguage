@@ -73,7 +73,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Community.VisualStudio.Toolkit.16" ExcludeAssets="runtime">
-      <Version>16.0.339</Version>
+      <Version>16.0.356</Version>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
       <Version>17.0.5232</Version>
@@ -82,21 +83,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseClasses\Attributes\ProvideBraceCompletionAttribute.cs" />
-    <Compile Include="BaseClasses\LanguageService\BraceCompletionBase.cs" />
-    <Compile Include="BaseClasses\LanguageService\CompletionCommitManagerBase.cs" />
-    <Compile Include="BaseClasses\LanguageService\DefaultAuthoringScope.cs" />
-    <Compile Include="BaseClasses\LanguageService\DefaultColorizer.cs" />
-    <Compile Include="BaseClasses\LanguageService\DefaultSource.cs" />
-    <Compile Include="BaseClasses\LanguageService\LanguageBase.cs" />
     <Compile Include="Commands\CommentCommand.cs" />
     <Compile Include="Commands\UncommentCommand.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Language\ErrorListManager.cs" />
-    <Compile Include="BaseClasses\ErrorList\ErrorListItem.cs" />
-    <Compile Include="BaseClasses\ErrorList\SinkManager.cs" />
-    <Compile Include="BaseClasses\ErrorList\TableDataSource.cs" />
-    <Compile Include="BaseClasses\ErrorList\TableEntriesSnapshot.cs" />
     <Compile Include="Language\BraceCompletion.cs" />
     <Compile Include="Language\ClassificationTagger.cs" />
     <Compile Include="Language\CompletionCatalog.cs" />

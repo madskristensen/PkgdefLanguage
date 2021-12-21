@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using BaseClasses;
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -25,7 +26,7 @@ namespace PkgdefLanguage
         {
             _docView = docView;
             _project = await VS.Solutions.GetActiveProjectAsync();
-            _dataSource = new TableDataSource();
+            _dataSource = new TableDataSource(Constants.LanguageName, Constants.LanguageName);
             _document = PkgdefDocument.FromTextbuffer(docView.TextBuffer);
             _document.Parsed += ParseErrors;
 

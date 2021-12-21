@@ -1,12 +1,11 @@
-﻿global using Task = System.Threading.Tasks.Task;
+﻿global using Community.VisualStudio.Toolkit;
+global using Task = System.Threading.Tasks.Task;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using RestClientVS;
 
 namespace PkgdefLanguage
 {
