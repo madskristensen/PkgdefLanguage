@@ -2,7 +2,7 @@
 
 namespace PkgdefLanguage
 {
-    public class CompletionCatalog
+    internal sealed class CompletionCatalog
     {
         public static IDictionary<string, string> Variables = new Dictionary<string, string>()
         {

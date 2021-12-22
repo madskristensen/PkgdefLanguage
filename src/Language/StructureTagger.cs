@@ -14,7 +14,7 @@ namespace PkgdefLanguage
     [TagType(typeof(IStructureTag))]
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
-    public class StructureTaggerProvider : ITaggerProvider
+    internal sealed class StructureTaggerProvider : ITaggerProvider
     {
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag =>
             buffer.Properties.GetOrCreateSingletonProperty(() => new StructureTagger(buffer)) as ITagger<T>;
@@ -43,7 +43,7 @@ namespace PkgdefLanguage
 
         public IEnumerable<ITagSpan<IStructureTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if (spans.Count == 0 || spans[0].IsEmpty || !_structureTags.Any())
+            if (spans.Count == 0 || spans[0].IsEmpty || !_structureTags.Any() || spans[0].Snapshot != _buffer.CurrentSnapshot)
             {
                 return null;
             }

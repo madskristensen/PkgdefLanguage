@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using BaseClasses;
-using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
@@ -15,7 +13,7 @@ namespace PkgdefLanguage
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
     [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
-    public class ErrorListManager : WpfTextViewCreationListener
+    internal sealed class ErrorListManager : WpfTextViewCreationListener
     {
         private DocumentView _docView;
         private Project _project;

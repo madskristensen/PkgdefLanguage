@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
+using TypeNames = Microsoft.VisualStudio.Language.StandardClassification.PredefinedClassificationTypeNames;
 
 namespace PkgdefLanguage
 {
@@ -14,7 +14,7 @@ namespace PkgdefLanguage
     [TagType(typeof(IClassificationTag))]
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
-    internal class ClassificationTaggerProvider : ITaggerProvider
+    internal sealed class ClassificationTaggerProvider : ITaggerProvider
     {
         [Import] internal IClassificationTypeRegistryService _classificationRegistry = null;
 
@@ -25,19 +25,20 @@ namespace PkgdefLanguage
     internal class ClassificationTagger : ITagger<IClassificationTag>
     {
         private readonly PkgdefDocument _document;
-        private static Dictionary<ItemType, IClassificationType> _map;
+        private static Dictionary<ItemType, ClassificationTag> _map;
 
         internal ClassificationTagger(ITextBuffer buffer, IClassificationTypeRegistryService registry)
         {
             _document = PkgdefDocument.FromTextbuffer(buffer);
 
-            _map ??= new Dictionary<ItemType, IClassificationType> {
-                { ItemType.RegistryKey, registry.GetClassificationType(PredefinedClassificationTypeNames.SymbolDefinition) },
-                { ItemType.String, registry.GetClassificationType(PredefinedClassificationTypeNames.String) },
-                { ItemType.Literal, registry.GetClassificationType(PredefinedClassificationTypeNames.Literal)},
-                { ItemType.Comment, registry.GetClassificationType(PredefinedClassificationTypeNames.Comment)},
-                { ItemType.ReferenceBraces, registry.GetClassificationType(PredefinedClassificationTypeNames.SymbolDefinition)},
-                { ItemType.ReferenceName, registry.GetClassificationType(PredefinedClassificationTypeNames.SymbolReference)},
+            _map ??= new()
+            {
+                { ItemType.RegistryKey, new ClassificationTag(registry.GetClassificationType(TypeNames.SymbolDefinition)) },
+                { ItemType.String, new ClassificationTag(registry.GetClassificationType(TypeNames.String)) },
+                { ItemType.Literal, new ClassificationTag(registry.GetClassificationType(TypeNames.Literal)) },
+                { ItemType.Comment, new ClassificationTag(registry.GetClassificationType(TypeNames.Comment)) },
+                { ItemType.ReferenceBraces, new ClassificationTag(registry.GetClassificationType(TypeNames.SymbolDefinition)) },
+                { ItemType.ReferenceName, new ClassificationTag(registry.GetClassificationType(TypeNames.SymbolReference)) },
             };
         }
 
@@ -50,22 +51,18 @@ namespace PkgdefLanguage
                     if (_map.ContainsKey(item.Type) && item.End <= span.Snapshot.Length)
                     {
                         var itemSpan = new SnapshotSpan(span.Snapshot, item.Start, item.Length);
-                        var itemTag = new ClassificationTag(_map[item.Type]);
-                        yield return new TagSpan<IClassificationTag>(itemSpan, itemTag);
+                        yield return new TagSpan<IClassificationTag>(itemSpan, _map[item.Type]);
 
                         foreach (Reference variable in item.References)
                         {
                             var openSpan = new SnapshotSpan(span.Snapshot, variable.Open.Start, variable.Open.Length);
-                            var openTag = new ClassificationTag(_map[variable.Open.Type]);
-                            yield return new TagSpan<IClassificationTag>(openSpan, openTag);
+                            yield return new TagSpan<IClassificationTag>(openSpan, _map[variable.Open.Type]);
 
                             var valueSpan = new SnapshotSpan(span.Snapshot, variable.Value.Start, variable.Value.Length);
-                            var valueTag = new ClassificationTag(_map[variable.Value.Type]);
-                            yield return new TagSpan<IClassificationTag>(valueSpan, valueTag);
+                            yield return new TagSpan<IClassificationTag>(valueSpan, _map[variable.Value.Type]);
 
                             var closeSpan = new SnapshotSpan(span.Snapshot, variable.Close.Start, variable.Close.Length);
-                            var closeTag = new ClassificationTag(_map[variable.Close.Type]);
-                            yield return new TagSpan<IClassificationTag>(closeSpan, closeTag);
+                            yield return new TagSpan<IClassificationTag>(closeSpan, _map[variable.Close.Type]);
                         }
                     }
                 }

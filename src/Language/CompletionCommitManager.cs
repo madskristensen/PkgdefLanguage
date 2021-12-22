@@ -8,7 +8,7 @@ namespace PkgdefLanguage
     [Export(typeof(IAsyncCompletionCommitManagerProvider))]
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
-    internal class CompletionCommitManager : CompletionCommitManagerBase
+    internal sealed class CompletionCommitManager : CompletionCommitManagerBase
     {
         public override IEnumerable<char> CommitChars => new char[] { ' ', '\'', '"', ',', '.', ';', ':' };
     }

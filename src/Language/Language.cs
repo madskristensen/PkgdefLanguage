@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 namespace PkgdefLanguage
 {
     [Guid(PackageGuids.EditorFactoryString)]
-    public class Language : LanguageBase
+    internal sealed class Language : LanguageBase
     {
         public Language(object site) : base(site)
         {
