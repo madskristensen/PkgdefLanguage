@@ -1,12 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
-    public class PkgdefDocument : Document
+    public class PkgdefDocument : Document, IDisposable
     {
         private readonly ITextBuffer _buffer;
+        private bool _isDisposed;
 
         public PkgdefDocument(ITextBuffer buffer)
             : base(buffer.CurrentSnapshot.Lines.Select(line => line.GetTextIncludingLineBreak()).ToArray())
@@ -24,6 +26,15 @@ namespace PkgdefLanguage
         public static PkgdefDocument FromTextbuffer(ITextBuffer buffer)
         {
             return buffer.Properties.GetOrCreateSingletonProperty(() => new PkgdefDocument(buffer));
+        }
+
+        public void Dispose()
+        {
+            if (!_isDisposed)
+            {
+                _buffer.Changed -= BufferChanged;
+                _isDisposed = true;
+            }
         }
     }
 }
