@@ -14,18 +14,13 @@ namespace PkgdefLanguage
         public ParseItem RegistryKey { get; }
         public List<Property> Properties { get; } = new();
 
-        public int Start => RegistryKey.Start;
-        public int End => Properties.Any() ? Properties.Last().Value.End : RegistryKey.End;
+        public int Start => RegistryKey.Span.Start;
+        public int End => Properties.Any() ? Properties.Last().Value.Span.End : RegistryKey.Span.End;
         public int Length => End - Start;
 
         public static implicit operator Span(Entry entry)
         {
             return Span.FromBounds(entry.Start, entry.End);
-        }
-
-        public bool Contains(int position)
-        {
-            return position >= Start && position <= End;
         }
     }
 }

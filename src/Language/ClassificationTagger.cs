@@ -46,9 +46,9 @@ namespace PkgdefLanguage
         {
             foreach (SnapshotSpan span in spans.Where(s => !s.IsEmpty))
             {
-                foreach (ParseItem item in _document.Items.Where(t => t.Start < span.End && t.End > span.Start))
+                foreach (ParseItem item in _document.Items.Where(t => t.Span.IntersectsWith(span)))
                 {
-                    if (_map.ContainsKey(item.Type) && item.End <= span.Snapshot.Length)
+                    if (_map.ContainsKey(item.Type) && item.Span.End <= span.Snapshot.Length)
                     {
                         var itemSpan = new SnapshotSpan(span.Snapshot, item);
                         yield return new TagSpan<IClassificationTag>(itemSpan, _map[item.Type]);

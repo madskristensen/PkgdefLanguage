@@ -43,10 +43,9 @@ namespace PkgdefLanguage
             Document document = PkgdefDocument.FromTextbuffer(session.TextView.TextBuffer);
             ParseItem item = document.GetTokenFromPosition(triggerLocation.Position);
 
-            // Variable
             if (item?.Type == ItemType.ReferenceName)
             {
-                return Task.FromResult(ConvertToCompletionItems(CompletionCatalog.Variables, _referenceIcon));
+                return Task.FromResult(ConvertToCompletionItems(PredefinedVariables.Variables, _referenceIcon));
             }
 
             return Task.FromResult<CompletionContext>(null);

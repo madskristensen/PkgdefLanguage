@@ -37,7 +37,7 @@ namespace PkgdefLanguage
 
             foreach (SnapshotSpan span in spans.Where(s => !s.IsEmpty))
             {
-                IEnumerable<ParseItem> tokens = _document.Items.Where(t => t.Start < span.End && t.End > span.Start);
+                IEnumerable<ParseItem> tokens = _document.Items.Where(t => t.Span.IntersectsWith(span));
 
                 foreach (ParseItem item in _document.Items)
                 {

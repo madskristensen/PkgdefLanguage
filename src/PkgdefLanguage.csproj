@@ -57,6 +57,7 @@
       <Link>Resources\LICENSE</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="Parser\readme.txt" />
     <Content Include="Resources\Icon.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -86,10 +87,10 @@
     <Compile Include="Commands\CommentCommand.cs" />
     <Compile Include="Commands\UncommentCommand.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Language\PredefinedVariables.cs" />
     <Compile Include="Language\ErrorListManager.cs" />
     <Compile Include="Language\BraceCompletion.cs" />
     <Compile Include="Language\ClassificationTagger.cs" />
-    <Compile Include="Language\CompletionCatalog.cs" />
     <Compile Include="Language\CompletionCommitManager.cs" />
     <Compile Include="Language\CompletionSource.cs" />
     <Compile Include="Language\ErrorTagger.cs" />

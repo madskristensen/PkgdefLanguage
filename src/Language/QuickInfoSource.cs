@@ -36,7 +36,7 @@ namespace PkgdefLanguage
 
                 ParseItem token = doc.GetTokenFromPosition(position);
 
-                if (token?.Type == ItemType.ReferenceName && CompletionCatalog.Variables.TryGetValue(token.Text, out var desc))
+                if (token?.Type == ItemType.ReferenceName && PredefinedVariables.Variables.TryGetValue(token.Text, out var desc))
                 {
                     ITextSnapshotLine line = triggerPoint.Value.GetContainingLine();
                     ITrackingSpan lineSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(line.Extent, SpanTrackingMode.EdgeInclusive);

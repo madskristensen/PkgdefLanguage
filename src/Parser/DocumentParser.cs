@@ -111,9 +111,9 @@ namespace PkgdefLanguage
         {
             foreach (Match match in _regexRef.Matches(token.Text))
             {
-                ParseItem open = ToParseItem(match, token.Start, "open", ItemType.ReferenceBraces, false);
-                ParseItem value = ToParseItem(match, token.Start, "value", ItemType.ReferenceName, false);
-                ParseItem close = ToParseItem(match, token.Start, "close", ItemType.ReferenceBraces, false);
+                ParseItem open = ToParseItem(match, token.Span.Start, "open", ItemType.ReferenceBraces, false);
+                ParseItem value = ToParseItem(match, token.Span.Start, "value", ItemType.ReferenceName, false);
+                ParseItem close = ToParseItem(match, token.Span.Start, "close", ItemType.ReferenceBraces, false);
 
                 var reference = new Reference(open, value, close);
 

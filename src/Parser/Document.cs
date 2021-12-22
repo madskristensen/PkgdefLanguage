@@ -31,8 +31,8 @@ namespace PkgdefLanguage
         }
         public ParseItem GetTokenFromPosition(int position)
         {
-            ParseItem item = Items.LastOrDefault(t => t.Contains(position));
-            ParseItem reference = item?.References.FirstOrDefault(v => v.Value != null && v.Value.Contains(position))?.Value;
+            ParseItem item = Items.LastOrDefault(t => t.Span.Contains(position));
+            ParseItem reference = item?.References.FirstOrDefault(v => v.Value != null && v.Value.Span.Contains(position))?.Value;
 
             // Return the reference if it exist; otherwise the item
             return reference ?? item;

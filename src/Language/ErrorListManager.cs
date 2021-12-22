@@ -71,7 +71,7 @@ namespace PkgdefLanguage
 
         private IEnumerable<ErrorListItem> CreateErrorListItem(ParseItem item)
         {
-            ITextSnapshotLine line = _docView.TextBuffer.CurrentSnapshot.GetLineFromPosition(item.Start);
+            ITextSnapshotLine line = _docView.TextBuffer.CurrentSnapshot.GetLineFromPosition(item.Span.Start);
 
             foreach (var error in item.Errors)
             {
@@ -83,7 +83,7 @@ namespace PkgdefLanguage
                     ErrorCategory = "syntax",
                     Severity = __VSERRORCATEGORY.EC_WARNING,
                     Line = line.LineNumber,
-                    Column = item.Start - line.Start.Position,
+                    Column = item.Span.Start - line.Start.Position,
                     BuildTool = Vsix.Name,
                 };
             }

@@ -64,7 +64,7 @@ namespace PkgdefLanguage
                 // Unknown references
                 foreach (Reference reference in item.References)
                 {
-                    if (!CompletionCatalog.Variables.Any(v => v.Key.Equals(reference.Value.Text, StringComparison.OrdinalIgnoreCase)))
+                    if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(reference.Value.Text, StringComparison.OrdinalIgnoreCase)))
                     {
                         reference.Value.AddError($"The variable \"{reference.Value.Text}\" doens't exist.");
                     }
