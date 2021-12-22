@@ -25,7 +25,7 @@ namespace PkgdefLanguage
             _docView = docView;
             _project = await VS.Solutions.GetActiveProjectAsync();
             _dataSource = new TableDataSource(Constants.LanguageName, Constants.LanguageName);
-            _document = PkgdefDocument.FromTextbuffer(docView.TextBuffer);
+            _document = docView.TextBuffer.GetDocument();
             _document.Processed += ParseErrors;
 
             ParseErrors();
