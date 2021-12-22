@@ -75,18 +75,16 @@ namespace PkgdefLanguage
             foreach (Entry entry in _document.Entries.Where(r => r.Properties.Any()))
             {
                 var text = entry.RegistryKey.Text.Trim();
-                var tooltip = entry.ToString();
 
-                var simpleSpan = new Span(entry.Start, entry.Length);
-                var snapShotSpan = new SnapshotSpan(snapshot, simpleSpan);
-                TagSpan<IStructureTag> tag = CreateTag(snapShotSpan, text, tooltip);
+                var snapShotSpan = new SnapshotSpan(snapshot, entry);
+                TagSpan<IStructureTag> tag = CreateTag(snapShotSpan, text);
                 list.Add(tag);
             }
 
             _structureTags = list;
         }
 
-        private static TagSpan<IStructureTag> CreateTag(SnapshotSpan span, string text, string tooltip)
+        private static TagSpan<IStructureTag> CreateTag(SnapshotSpan span, string text)
         {
             var structureTag = new StructureTag(
                         span.Snapshot,
@@ -96,7 +94,7 @@ namespace PkgdefLanguage
                         type: PredefinedStructureTagTypes.Structural,
                         isCollapsible: true,
                         collapsedForm: text,
-                        collapsedHintForm: tooltip);
+                        collapsedHintForm: null);
 
             return new TagSpan<IStructureTag>(span, structureTag);
         }

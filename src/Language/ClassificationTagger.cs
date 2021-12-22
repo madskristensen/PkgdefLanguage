@@ -50,18 +50,18 @@ namespace PkgdefLanguage
                 {
                     if (_map.ContainsKey(item.Type) && item.End <= span.Snapshot.Length)
                     {
-                        var itemSpan = new SnapshotSpan(span.Snapshot, item.Start, item.Length);
+                        var itemSpan = new SnapshotSpan(span.Snapshot, item);
                         yield return new TagSpan<IClassificationTag>(itemSpan, _map[item.Type]);
 
                         foreach (Reference variable in item.References)
                         {
-                            var openSpan = new SnapshotSpan(span.Snapshot, variable.Open.Start, variable.Open.Length);
+                            var openSpan = new SnapshotSpan(span.Snapshot, variable.Open);
                             yield return new TagSpan<IClassificationTag>(openSpan, _map[variable.Open.Type]);
 
-                            var valueSpan = new SnapshotSpan(span.Snapshot, variable.Value.Start, variable.Value.Length);
+                            var valueSpan = new SnapshotSpan(span.Snapshot, variable.Value);
                             yield return new TagSpan<IClassificationTag>(valueSpan, _map[variable.Value.Type]);
 
-                            var closeSpan = new SnapshotSpan(span.Snapshot, variable.Close.Start, variable.Close.Length);
+                            var closeSpan = new SnapshotSpan(span.Snapshot, variable.Close);
                             yield return new TagSpan<IClassificationTag>(closeSpan, _map[variable.Close.Type]);
                         }
                     }

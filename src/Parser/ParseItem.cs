@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
@@ -59,6 +60,11 @@ namespace PkgdefLanguage
                 var index = Document.Items.IndexOf(this);
                 return Document.Items.ElementAtOrDefault(index + 1);
             }
+        }
+
+        public static implicit operator Span(ParseItem parseItem)
+        {
+            return Span.FromBounds(parseItem.Start, parseItem.End);
         }
 
         public override string ToString()

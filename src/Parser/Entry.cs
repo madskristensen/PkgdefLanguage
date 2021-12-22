@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
@@ -16,6 +17,11 @@ namespace PkgdefLanguage
         public int Start => RegistryKey.Start;
         public int End => Properties.Any() ? Properties.Last().Value.End : RegistryKey.End;
         public int Length => End - Start;
+
+        public static implicit operator Span(Entry entry)
+        {
+            return Span.FromBounds(entry.Start, entry.End);
+        }
 
         public bool Contains(int position)
         {

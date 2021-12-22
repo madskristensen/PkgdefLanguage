@@ -45,8 +45,7 @@ namespace PkgdefLanguage
                     {
                         var tooltip = string.Join(Environment.NewLine, item.Errors);
 
-                        var simpleSpan = new Span(item.Start, item.Length);
-                        var snapShotSpan = new SnapshotSpan(span.Snapshot, simpleSpan);
+                        var snapShotSpan = new SnapshotSpan(span.Snapshot, item);
                         var errorTag = new ErrorTag(PredefinedErrorTypeNames.SyntaxError, tooltip);
 
                         yield return new TagSpan<IErrorTag>(snapShotSpan, errorTag);
@@ -58,8 +57,7 @@ namespace PkgdefLanguage
                         {
                             var tooltip = string.Join(Environment.NewLine, reference.Value.Errors);
 
-                            var simpleSpan = new Span(reference.Value.Start, reference.Value.Length);
-                            var snapShotSpan = new SnapshotSpan(span.Snapshot, simpleSpan);
+                            var snapShotSpan = new SnapshotSpan(span.Snapshot, reference.Value);
                             var errorTag = new ErrorTag(PredefinedErrorTypeNames.CompilerError, tooltip);
 
                             yield return new TagSpan<IErrorTag>(snapShotSpan, errorTag);
