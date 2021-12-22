@@ -30,8 +30,8 @@ namespace PkgdefLanguage
         public StructureTagger(ITextBuffer buffer)
         {
             _buffer = buffer;
-            _document = PkgdefDocument.FromTextbuffer(buffer);
-            _document.Parsed += DocumentParsed;
+            _document = buffer.GetDocument();
+            _document.Processed += DocumentParsed;
 
             StartParsing();
         }
@@ -55,7 +55,7 @@ namespace PkgdefLanguage
         {
             ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
             {
-                if (TagsChanged != null && !_document.IsParsing)
+                if (TagsChanged != null && !_document.IsProcessing)
                 {
                     ReParse();
                     SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
@@ -103,7 +103,7 @@ namespace PkgdefLanguage
         {
             if (!_isDisposed)
             {
-                _document.Parsed -= DocumentParsed;
+                _document.Processed -= DocumentParsed;
             }
 
             _isDisposed = true;

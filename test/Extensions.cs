@@ -6,7 +6,7 @@ namespace PkgdefLanguage.Test
     {
         public static async Task WaitForParsingCompleteAsync(this Document document)
         {
-            while (document.IsParsing)
+            while (document.IsProcessing)
             {
                 await Task.Delay(2);
             }

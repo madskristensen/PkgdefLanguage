@@ -26,7 +26,7 @@ namespace PkgdefLanguage
             _project = await VS.Solutions.GetActiveProjectAsync();
             _dataSource = new TableDataSource(Constants.LanguageName, Constants.LanguageName);
             _document = PkgdefDocument.FromTextbuffer(docView.TextBuffer);
-            _document.Parsed += ParseErrors;
+            _document.Processed += ParseErrors;
 
             ParseErrors();
         }
@@ -41,7 +41,7 @@ namespace PkgdefLanguage
 
             ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
             {
-                if (_document.IsParsing)
+                if (_document.IsProcessing)
                 {
                     return;
                 }
@@ -91,7 +91,7 @@ namespace PkgdefLanguage
 
         protected override void Closed(IWpfTextView textView)
         {
-            _document.Parsed -= ParseErrors;
+            _document.Processed -= ParseErrors;
             _document.Dispose();
             _dataSource.CleanAllErrors();
         }

@@ -1,8 +1,12 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.Core.Imaging;
+using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Utilities;
 
 namespace PkgdefLanguage
@@ -19,10 +23,13 @@ namespace PkgdefLanguage
     internal sealed class QuickInfoSource : IAsyncQuickInfoSource
     {
         private readonly ITextBuffer _buffer;
+        private readonly PkgdefDocument _document;
+        private static readonly ImageId _errorIcon = KnownMonikers.StatusWarningNoColor.ToImageId();
 
         public QuickInfoSource(ITextBuffer buffer)
         {
             _buffer = buffer;
+            _document = buffer.GetDocument();
         }
 
         public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken)
@@ -31,17 +38,20 @@ namespace PkgdefLanguage
 
             if (triggerPoint.HasValue)
             {
-                Document doc = PkgdefDocument.FromTextbuffer(_buffer);
                 var position = triggerPoint.Value.Position;
 
-                ParseItem token = doc.GetTokenFromPosition(position);
+                ParseItem item = _document.GetTokenFromPosition(position);
 
-                if (token?.Type == ItemType.ReferenceName && PredefinedVariables.Variables.TryGetValue(token.Text, out var desc))
+                if (!item.IsValid)
                 {
-                    ITextSnapshotLine line = triggerPoint.Value.GetContainingLine();
-                    ITrackingSpan lineSpan = _buffer.CurrentSnapshot.CreateTrackingSpan(line.Extent, SpanTrackingMode.EdgeInclusive);
+                    ITrackingSpan span = _buffer.CurrentSnapshot.CreateTrackingSpan(item, SpanTrackingMode.EdgeInclusive);
 
-                    return Task.FromResult(new QuickInfoItem(lineSpan, desc));
+                    var elm = new ContainerElement(
+                        ContainerElementStyle.Wrapped,
+                        new ImageElement(_errorIcon),
+                        string.Join(Environment.NewLine, item.Errors));
+
+                    return Task.FromResult(new QuickInfoItem(span, elm));
                 }
             }
 

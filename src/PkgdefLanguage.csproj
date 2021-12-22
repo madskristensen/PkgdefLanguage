@@ -94,10 +94,11 @@
     <Compile Include="Language\CompletionCommitManager.cs" />
     <Compile Include="Language\CompletionSource.cs" />
     <Compile Include="Language\ErrorTagger.cs" />
-    <Compile Include="Language\Language.cs" />
+    <Compile Include="Language\LanguageService.cs" />
     <Compile Include="Language\QuickInfoSource.cs" />
     <Compile Include="Language\StructureTagger.cs" />
     <Compile Include="Parser\Document.cs" />
+    <Compile Include="Parser\DocumentModeller.cs" />
     <Compile Include="Parser\DocumentParser.cs" />
     <Compile Include="Parser\DocumentValidator.cs" />
     <Compile Include="Parser\ItemType.cs" />

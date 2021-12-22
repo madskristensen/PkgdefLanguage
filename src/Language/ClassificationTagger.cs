@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -25,11 +24,13 @@ namespace PkgdefLanguage
     internal class ClassificationTagger : ITagger<IClassificationTag>
     {
         private readonly PkgdefDocument _document;
+        private readonly ITextBuffer _buffer;
         private static Dictionary<ItemType, ClassificationTag> _map;
 
         internal ClassificationTagger(ITextBuffer buffer, IClassificationTypeRegistryService registry)
         {
-            _document = PkgdefDocument.FromTextbuffer(buffer);
+            _document = buffer.GetDocument();
+            _buffer = buffer;
 
             _map ??= new()
             {
@@ -44,26 +45,23 @@ namespace PkgdefLanguage
 
         public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            foreach (SnapshotSpan span in spans.Where(s => !s.IsEmpty))
+            foreach (ParseItem item in _document.ItemsIntersectingWith(spans))
             {
-                foreach (ParseItem item in _document.Items.Where(t => t.Span.IntersectsWith(span)))
+                if (_map.ContainsKey(item.Type) && item.Span.End <= _buffer.CurrentSnapshot.Length)
                 {
-                    if (_map.ContainsKey(item.Type) && item.Span.End <= span.Snapshot.Length)
+                    var itemSpan = new SnapshotSpan(_buffer.CurrentSnapshot, item);
+                    yield return new TagSpan<IClassificationTag>(itemSpan, _map[item.Type]);
+
+                    foreach (Reference variable in item.References)
                     {
-                        var itemSpan = new SnapshotSpan(span.Snapshot, item);
-                        yield return new TagSpan<IClassificationTag>(itemSpan, _map[item.Type]);
+                        var openSpan = new SnapshotSpan(_buffer.CurrentSnapshot, variable.Open);
+                        yield return new TagSpan<IClassificationTag>(openSpan, _map[variable.Open.Type]);
 
-                        foreach (Reference variable in item.References)
-                        {
-                            var openSpan = new SnapshotSpan(span.Snapshot, variable.Open);
-                            yield return new TagSpan<IClassificationTag>(openSpan, _map[variable.Open.Type]);
+                        var valueSpan = new SnapshotSpan(_buffer.CurrentSnapshot, variable.Value);
+                        yield return new TagSpan<IClassificationTag>(valueSpan, _map[variable.Value.Type]);
 
-                            var valueSpan = new SnapshotSpan(span.Snapshot, variable.Value);
-                            yield return new TagSpan<IClassificationTag>(valueSpan, _map[variable.Value.Type]);
-
-                            var closeSpan = new SnapshotSpan(span.Snapshot, variable.Close);
-                            yield return new TagSpan<IClassificationTag>(closeSpan, _map[variable.Close.Type]);
-                        }
+                        var closeSpan = new SnapshotSpan(_buffer.CurrentSnapshot, variable.Close);
+                        yield return new TagSpan<IClassificationTag>(closeSpan, _map[variable.Close.Type]);
                     }
                 }
             }

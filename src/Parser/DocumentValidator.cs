@@ -5,6 +5,8 @@ namespace PkgdefLanguage
 {
     public partial class Document
     {
+        public bool IsValid { get; set; }
+
         private void ValidateDocument()
         {
             IsValid = true;
@@ -26,8 +28,7 @@ namespace PkgdefLanguage
                     {
                         item.AddError("Unclosed registry key entry. Add the missing ] character");
                     }
-
-                    if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
+                    else if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
                     {
                         item.AddError("Use the backslash character as delimiter instead of forward slash.");
                     }

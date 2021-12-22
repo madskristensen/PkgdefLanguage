@@ -40,12 +40,12 @@ namespace PkgdefLanguage
 
         public Task<CompletionContext> GetCompletionContextAsync(IAsyncCompletionSession session, CompletionTrigger trigger, SnapshotPoint triggerLocation, SnapshotSpan applicableToSpan, CancellationToken cancellationToken)
         {
-            Document document = PkgdefDocument.FromTextbuffer(session.TextView.TextBuffer);
+            Document document = session.TextView.TextBuffer.GetDocument();
             ParseItem item = document.GetTokenFromPosition(triggerLocation.Position);
 
             if (item?.Type == ItemType.ReferenceName)
             {
-                return Task.FromResult(ConvertToCompletionItems(PredefinedVariables.Variables, _referenceIcon));
+                return Task.FromResult(GetCompletionItems());
             }
 
             return Task.FromResult<CompletionContext>(null);
@@ -54,14 +54,14 @@ namespace PkgdefLanguage
         /// <summary>
         /// Returns completion items applicable to the value portion of the key-value pair
         /// </summary>
-        private CompletionContext ConvertToCompletionItems(IDictionary<string, string> dic, ImageElement icon)
+        private CompletionContext GetCompletionItems()
         {
             List<CompletionItem> items = new();
 
-            foreach (var key in dic.Keys)
+            foreach (var key in PredefinedVariables.Variables.Keys)
             {
-                var completion = new CompletionItem(key, this, icon, ImmutableArray<CompletionFilter>.Empty, "", $"${key}$", key, key, ImmutableArray<ImageElement>.Empty);
-                completion.Properties.AddProperty("description", dic[key].Trim());
+                var completion = new CompletionItem(key, this, _referenceIcon, ImmutableArray<CompletionFilter>.Empty, "", $"${key}$", key, key, ImmutableArray<ImageElement>.Empty);
+                completion.Properties.AddProperty("description", PredefinedVariables.Variables[key].Trim());
                 items.Add(completion);
             }
 

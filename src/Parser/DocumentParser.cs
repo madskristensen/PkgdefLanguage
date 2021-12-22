@@ -9,38 +9,28 @@ namespace PkgdefLanguage
         private static readonly Regex _regexProperty = new(@"^(?<name>.+)(\s)*(?<equals>=)\s*(?<value>.+)", RegexOptions.Compiled);
         private static readonly Regex _regexRef = new(@"(?<open>\$)(?<value>[\w]+)(?<close>\$)", RegexOptions.Compiled);
 
-        public bool IsParsing { get; private set; }
-
-        public Task ParseAsync()
+        public void Parse()
         {
-            IsParsing = true;
+            var start = 0;
 
-            return Task.Run(() =>
+            try
             {
-                var start = 0;
+                List<ParseItem> items = new();
 
-                try
+                foreach (var line in _lines)
                 {
-                    List<ParseItem> items = new();
-
-                    foreach (var line in _lines)
-                    {
-                        IEnumerable<ParseItem> current = ParseLine(start, line, items);
-                        items.AddRange(current);
-                        start += line.Length;
-                    }
-
-                    Items = items;
-
-                    OrganizeItems();
-                    ValidateDocument();
+                    IEnumerable<ParseItem> current = ParseLine(start, line, items);
+                    items.AddRange(current);
+                    start += line.Length;
                 }
-                finally
-                {
-                    IsParsing = false;
-                    Parsed?.Invoke(this, EventArgs.Empty);
-                }
-            });
+
+                Items = items;
+            }
+            finally
+            {
+                IsProcessing = false;
+                Processed?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private IEnumerable<ParseItem> ParseLine(int start, string line, List<ParseItem> tokens)
@@ -120,39 +110,5 @@ namespace PkgdefLanguage
                 token.References.Add(reference);
             }
         }
-
-        private void OrganizeItems()
-        {
-            List<Entry> entries = new();
-            Entry currentEntry = null;
-            ParseItem propName = null;
-
-            foreach (ParseItem item in Items)
-            {
-                if (item.Type == ItemType.RegistryKey)
-                {
-                    currentEntry = new Entry(item);
-                    entries.Add(currentEntry);
-                }
-                else if (item.Type == ItemType.String || item.Type == ItemType.Literal)
-                {
-                    if (propName == null)
-                    {
-                        propName = item;
-
-                    }
-                    else
-                    {
-                        var property = new Property(propName, item);
-                        currentEntry?.Properties.Add(property);
-                        propName = null;
-                    }
-                }
-            }
-
-            Entries = entries;
-        }
-
-        public event EventHandler Parsed;
     }
 }

@@ -6,9 +6,9 @@ using Microsoft.VisualStudio.TextManager.Interop;
 namespace PkgdefLanguage
 {
     [Guid(PackageGuids.EditorFactoryString)]
-    internal sealed class Language : LanguageBase
+    internal sealed class LanguageService : LanguageBase
     {
-        public Language(object site) : base(site)
+        public LanguageService(object site) : base(site)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
         }
