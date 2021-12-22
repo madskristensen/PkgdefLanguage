@@ -19,6 +19,11 @@ Full completion provided for variables.
 
 ![Intellisense](art/intellisense.png)
 
+## Validation
+There's validation for both syntax errors and unknown variables.
+
+![Validation](art/validation.png)
+
 ## Outlining
 Collapse sections for better overview of the document.
 

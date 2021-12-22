@@ -16,6 +16,10 @@
     {
       "pathOnDisk": "art/outlining.png",
       "targetPath": "art/outlining.png"
+    },
+    {
+      "pathOnDisk": "art/validation.png",
+      "targetPath": "art/validation.png"
     }
   ],
   "overview": "README.md",
