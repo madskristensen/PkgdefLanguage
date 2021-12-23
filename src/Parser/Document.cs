@@ -18,8 +18,6 @@ namespace PkgdefLanguage
 
         public List<ParseItem> Items { get; private set; } = new();
 
-        public List<Entry> Entries { get; private set; } = new();
-
         public void UpdateLines(string[] lines)
         {
             _lines = lines;
@@ -40,7 +38,6 @@ namespace PkgdefLanguage
                 try
                 {
                     Parse();
-                    CreateSemanticModel();
                     ValidateDocument();
                 }
                 finally

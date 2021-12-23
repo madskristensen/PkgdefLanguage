@@ -42,7 +42,7 @@ namespace PkgdefLanguage
 
                 ParseItem item = _document.GetTokenFromPosition(position);
 
-                if (!item.IsValid)
+                if (item?.IsValid == false)
                 {
                     ITrackingSpan span = _buffer.CurrentSnapshot.CreateTrackingSpan(item, SpanTrackingMode.EdgeInclusive);
 

@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -16,72 +13,33 @@ namespace PkgdefLanguage
     [Name(Constants.LanguageName)]
     internal sealed class StructureTaggerProvider : ITaggerProvider
     {
-        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag =>
-            buffer.Properties.GetOrCreateSingletonProperty(() => new StructureTagger(buffer)) as ITagger<T>;
+        [Import] internal IBufferTagAggregatorFactoryService _bufferTagAggregator = null;
+
+        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+        {
+            ITagAggregator<LexTag> lexTags = _bufferTagAggregator.CreateTagAggregator<LexTag>(buffer);
+            return buffer.Properties.GetOrCreateSingletonProperty(() => new StructureTagger(lexTags)) as ITagger<T>;
+        }
     }
 
-    public class StructureTagger : ITagger<IStructureTag>, IDisposable
+    public class StructureTagger : LexTaggerConsumerBase<IStructureTag, LexTag>
     {
-        private readonly ITextBuffer _buffer;
-        private readonly PkgdefDocument _document;
-        private List<ITagSpan<IStructureTag>> _structureTags = new();
-        private bool _isDisposed;
+        public StructureTagger(ITagAggregator<LexTag> lexTags) : base(lexTags)
+        { }
 
-        public StructureTagger(ITextBuffer buffer)
+        public override IEnumerable<ITagSpan<IStructureTag>> GetTags(IMappingTagSpan<LexTag> span)
         {
-            _buffer = buffer;
-            _document = buffer.GetDocument();
-            _document.Processed += DocumentParsed;
-
-            StartParsing();
-        }
-
-        private void DocumentParsed(object sender, EventArgs e)
-        {
-            StartParsing();
-        }
-
-        public IEnumerable<ITagSpan<IStructureTag>> GetTags(NormalizedSnapshotSpanCollection spans)
-        {
-            if (spans.Count == 0 || spans[0].IsEmpty || !_structureTags.Any() || spans[0].Snapshot != _buffer.CurrentSnapshot)
+            if (span.Tag.Item is not Entry entry)
             {
-                return null;
+                yield break;
             }
 
-            return _structureTags;
-        }
+            NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
 
-        private void StartParsing()
-        {
-            ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
+            foreach (SnapshotSpan tagSpan in tagSpans)
             {
-                if (TagsChanged != null && !_document.IsProcessing)
-                {
-                    ReParse();
-                    SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
-                    TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
-                }
-
-                return Task.CompletedTask;
-            },
-                VsTaskRunContext.UIThreadBackgroundPriority).FireAndForget();
-        }
-
-        private void ReParse()
-        {
-            ITextSnapshot snapshot = _buffer.CurrentSnapshot;
-            List<ITagSpan<IStructureTag>> list = new();
-
-            foreach (Entry entry in _document.Entries.Where(r => r.Properties.Any()))
-            {
-                var text = entry.RegistryKey.Text.Trim();
-
-                var snapShotSpan = new SnapshotSpan(snapshot, entry);
-                TagSpan<IStructureTag> tag = CreateTag(snapShotSpan, text);
-                list.Add(tag);
+                yield return CreateTag(tagSpan, entry.RegistryKey.Text.Trim());
             }
-
-            _structureTags = list;
         }
 
         private static TagSpan<IStructureTag> CreateTag(SnapshotSpan span, string text)
@@ -98,17 +56,5 @@ namespace PkgdefLanguage
 
             return new TagSpan<IStructureTag>(span, structureTag);
         }
-
-        public void Dispose()
-        {
-            if (!_isDisposed)
-            {
-                _document.Processed -= DocumentParsed;
-            }
-
-            _isDisposed = true;
-        }
-
-        public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
     }
 }

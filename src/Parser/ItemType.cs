@@ -10,5 +10,6 @@
         Literal,
         Operator,
         Unknown,
+        Entry,
     }
 }

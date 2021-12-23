@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text;
@@ -14,59 +13,34 @@ namespace PkgdefLanguage
     [Name(Constants.LanguageName)]
     internal sealed class RestErrorTaggerProvider : ITaggerProvider
     {
-        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag =>
-            buffer.Properties.GetOrCreateSingletonProperty(() => new ErrorTagger(buffer)) as ITagger<T>;
+        [Import] internal IBufferTagAggregatorFactoryService _bufferTagAggregator = null;
+
+        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+        {
+            ITagAggregator<LexTag> tagAggregator = _bufferTagAggregator.CreateTagAggregator<LexTag>(buffer);
+            return buffer.Properties.GetOrCreateSingletonProperty(() => new ErrorTagger(tagAggregator)) as ITagger<T>;
+        }
     }
 
-    public class ErrorTagger : ITagger<IErrorTag>
+    public class ErrorTagger : LexTaggerConsumerBase<IErrorTag, LexTag>
     {
-        private readonly PkgdefDocument _document;
-        private readonly ITextBuffer _buffer;
+        public ErrorTagger(ITagAggregator<LexTag> lexTags) : base(lexTags)
+        { }
 
-        public ErrorTagger(ITextBuffer buffer)
+        public override IEnumerable<ITagSpan<IErrorTag>> GetTags(IMappingTagSpan<LexTag> span)
         {
-            _document = buffer.GetDocument();
-            _buffer = buffer;
-        }
-
-        public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
-        {
-            if (_document.IsProcessing || _document.IsValid)
+            if (span.Tag.Item.IsValid)
             {
                 yield break;
             }
 
-            foreach (ParseItem item in _document.ItemsIntersectingWith(spans))
+            NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
+
+            foreach (SnapshotSpan tagSpan in tagSpans)
             {
-                if (!item.IsValid)
-                {
-                    var tooltip = string.Join(Environment.NewLine, item.Errors);
-
-                    var snapShotSpan = new SnapshotSpan(_buffer.CurrentSnapshot, item);
-                    var errorTag = new ErrorTag(PredefinedErrorTypeNames.SyntaxError, tooltip);
-
-                    yield return new TagSpan<IErrorTag>(snapShotSpan, errorTag);
-                }
-
-                foreach (Reference reference in item.References)
-                {
-                    if (!reference.Value.IsValid)
-                    {
-                        var tooltip = string.Join(Environment.NewLine, reference.Value.Errors);
-
-                        var snapShotSpan = new SnapshotSpan(_buffer.CurrentSnapshot, reference.Value);
-                        var errorTag = new ErrorTag(PredefinedErrorTypeNames.CompilerError, tooltip);
-
-                        yield return new TagSpan<IErrorTag>(snapShotSpan, errorTag);
-                    }
-                }
+                var errorTag = new ErrorTag(PredefinedErrorTypeNames.SyntaxError, null);
+                yield return new TagSpan<IErrorTag>(tagSpan, errorTag);
             }
-        }
-
-        public event EventHandler<SnapshotSpanEventArgs> TagsChanged
-        {
-            add { }
-            remove { }
         }
     }
 }

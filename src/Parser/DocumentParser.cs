@@ -13,25 +13,19 @@ namespace PkgdefLanguage
         {
             var start = 0;
 
-            try
-            {
-                List<ParseItem> items = new();
+            List<ParseItem> items = new();
 
-                foreach (var line in _lines)
-                {
-                    IEnumerable<ParseItem> current = ParseLine(start, line, items);
-                    items.AddRange(current);
-                    start += line.Length;
-                }
-
-                Items = items;
-            }
-            finally
+            foreach (var line in _lines)
             {
-                IsProcessing = false;
-                Processed?.Invoke(this, EventArgs.Empty);
+                IEnumerable<ParseItem> current = ParseLine(start, line, items);
+                items.AddRange(current);
+                start += line.Length;
             }
+
+            Items = items;
         }
+
+        private Entry _currentEntry = null;
 
         private IEnumerable<ParseItem> ParseLine(int start, string line, List<ParseItem> tokens)
         {
@@ -47,15 +41,27 @@ namespace PkgdefLanguage
             else if (trimmedLine.StartsWith("[", StringComparison.Ordinal))
             {
                 var key = new ParseItem(start, line, this, ItemType.RegistryKey);
+                _currentEntry = new Entry(key, this);
+                items.Add(_currentEntry);
                 items.Add(key);
                 AddVariableReferences(key);
             }
             // Property
             else if (tokens.Count > 0 && IsMatch(_regexProperty, trimmedLine, out Match matchHeader))
             {
-                items.Add(ToParseItem(matchHeader, start, "name", false));
-                items.Add(ToParseItem(matchHeader, start, "equals", ItemType.Operator, false));
-                items.Add(ToParseItem(matchHeader, start, "value"));
+                ParseItem name = ToParseItem(matchHeader, start, "name", false);
+                ParseItem equals = ToParseItem(matchHeader, start, "equals", ItemType.Operator, false);
+                ParseItem value = ToParseItem(matchHeader, start, "value");
+
+                if (_currentEntry != null)
+                {
+                    var prop = new Property(name, value);
+                    _currentEntry.Properties.Add(prop);
+                }
+
+                items.Add(name);
+                items.Add(equals);
+                items.Add(value);
             }
             // Unknown
             else if (trimmedLine.Length > 0)

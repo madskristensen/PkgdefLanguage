@@ -18,13 +18,14 @@ namespace PkgdefLanguage.Test
 
             var doc = Document.FromLines(lines);
             await doc.WaitForParsingCompleteAsync();
+            var entries = doc.Items.OfType<Entry>().ToList();
 
-            Assert.AreEqual(1, doc.Entries.Count);
+            Assert.AreEqual(1, entries.Count);
 
-            Entry entry = doc.Entries.First();
+            Entry entry = entries.First();
             Assert.AreEqual(1, entry.Properties.Count);
             Assert.AreEqual("@", entry.Properties.First().Name.Text);
-            Assert.AreEqual(16, entry.End);
+            Assert.AreEqual(16, entry.Span.End);
         }
 
         [TestMethod]
@@ -39,16 +40,18 @@ namespace PkgdefLanguage.Test
 
             var doc = Document.FromLines(lines);
             await doc.WaitForParsingCompleteAsync();
+            var entries = doc.Items.OfType<Entry>().ToList();
 
-            Assert.AreEqual(2, doc.Entries.Count);
 
-            Entry first = doc.Entries.First();
-            Entry second = doc.Entries.Last();
+            Assert.AreEqual(2, entries.Count);
+
+            Entry first = entries.First();
+            Entry second = entries.Last();
 
             Assert.AreEqual(2, first.Properties.Count);
-            Assert.AreEqual(29, first.End);
+            Assert.AreEqual(29, first.Span.End);
             Assert.AreEqual("@", second.Properties.First().Name.Text);
-            Assert.AreEqual(45, second.End);
+            Assert.AreEqual(45, second.Span.End);
         }
 
         [TestMethod]
@@ -75,7 +78,9 @@ namespace PkgdefLanguage.Test
 
             var doc = Document.FromLines(lines);
             await doc.WaitForParsingCompleteAsync();
-            ParseItem prop = doc.Entries[0].Properties[0].Name;
+            var entries = doc.Items.OfType<Entry>().ToList();
+
+            ParseItem prop = entries[0].Properties[0].Name;
 
             Assert.IsFalse(prop.IsValid);
         }

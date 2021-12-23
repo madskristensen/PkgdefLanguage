@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -16,22 +15,21 @@ namespace PkgdefLanguage
     internal sealed class ClassificationTaggerProvider : ITaggerProvider
     {
         [Import] internal IClassificationTypeRegistryService _classificationRegistry = null;
+        [Import] internal IBufferTagAggregatorFactoryService _bufferTagAggregator = null;
 
-        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag =>
-            buffer.Properties.GetOrCreateSingletonProperty(() => new ClassificationTagger(buffer, _classificationRegistry)) as ITagger<T>;
+        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+        {
+            ITagAggregator<LexTag> tagAggregator = _bufferTagAggregator.CreateTagAggregator<LexTag>(buffer);
+            return buffer.Properties.GetOrCreateSingletonProperty(() => new ClassificationTagger(_classificationRegistry, tagAggregator)) as ITagger<T>;
+        }
     }
 
-    internal class ClassificationTagger : ITagger<IClassificationTag>
+    internal class ClassificationTagger : LexTaggerConsumerBase<IClassificationTag, LexTag>
     {
-        private readonly PkgdefDocument _document;
-        private readonly ITextBuffer _buffer;
         private static Dictionary<ItemType, ClassificationTag> _map;
 
-        internal ClassificationTagger(ITextBuffer buffer, IClassificationTypeRegistryService registry)
+        internal ClassificationTagger(IClassificationTypeRegistryService registry, ITagAggregator<LexTag> lexTags) : base(lexTags)
         {
-            _document = buffer.GetDocument();
-            _buffer = buffer;
-
             _map ??= new()
             {
                 { ItemType.RegistryKey, new ClassificationTag(registry.GetClassificationType(TypeNames.SymbolDefinition)) },
@@ -40,37 +38,21 @@ namespace PkgdefLanguage
                 { ItemType.Comment, new ClassificationTag(registry.GetClassificationType(TypeNames.Comment)) },
                 { ItemType.ReferenceBraces, new ClassificationTag(registry.GetClassificationType(TypeNames.SymbolDefinition)) },
                 { ItemType.ReferenceName, new ClassificationTag(registry.GetClassificationType(TypeNames.SymbolReference)) },
+                { ItemType.Operator, new ClassificationTag(registry.GetClassificationType(TypeNames.Operator)) },
             };
         }
 
-        public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public override IEnumerable<ITagSpan<IClassificationTag>> GetTags(IMappingTagSpan<LexTag> span)
         {
-            foreach (ParseItem item in _document.ItemsIntersectingWith(spans))
+            if (_map.TryGetValue(span.Tag.Item.Type, out ClassificationTag classificationTag))
             {
-                if (_map.ContainsKey(item.Type) && item.Span.End <= _buffer.CurrentSnapshot.Length)
+                NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
+
+                foreach (SnapshotSpan tagSpan in tagSpans)
                 {
-                    var itemSpan = new SnapshotSpan(_buffer.CurrentSnapshot, item);
-                    yield return new TagSpan<IClassificationTag>(itemSpan, _map[item.Type]);
-
-                    foreach (Reference variable in item.References)
-                    {
-                        var openSpan = new SnapshotSpan(_buffer.CurrentSnapshot, variable.Open);
-                        yield return new TagSpan<IClassificationTag>(openSpan, _map[variable.Open.Type]);
-
-                        var valueSpan = new SnapshotSpan(_buffer.CurrentSnapshot, variable.Value);
-                        yield return new TagSpan<IClassificationTag>(valueSpan, _map[variable.Value.Type]);
-
-                        var closeSpan = new SnapshotSpan(_buffer.CurrentSnapshot, variable.Close);
-                        yield return new TagSpan<IClassificationTag>(closeSpan, _map[variable.Close.Type]);
-                    }
+                    yield return new TagSpan<ClassificationTag>(tagSpan, classificationTag);
                 }
             }
-        }
-
-        public event EventHandler<SnapshotSpanEventArgs> TagsChanged
-        {
-            add { }
-            remove { }
         }
     }
 }

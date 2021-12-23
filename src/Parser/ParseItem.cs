@@ -18,13 +18,13 @@ namespace PkgdefLanguage
 
         public ItemType Type { get; }
 
-        public Span Span { get; }
+        public virtual Span Span { get; }
 
         public string Text { get; protected set; }
 
         public Document Document { get; }
 
-        public List<Reference> References { get; } = new List<Reference>();
+        public List<Reference> References { get; } = new();
 
         public IEnumerable<string> Errors => _errors;
 
@@ -62,6 +62,23 @@ namespace PkgdefLanguage
         public override string ToString()
         {
             return Type + " " + Text;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -1393027003;
+            hashCode = hashCode * -1521134295 + Type.GetHashCode();
+            hashCode = hashCode * -1521134295 + Span.Start.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Text);
+            return hashCode;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ParseItem item &&
+                   Type == item.Type &&
+                   EqualityComparer<Span>.Default.Equals(Span, item.Span) &&
+                   Text == item.Text;
         }
     }
 }

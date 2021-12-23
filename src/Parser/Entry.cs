@@ -4,9 +4,10 @@ using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
-    public class Entry
+    public class Entry : ParseItem
     {
-        public Entry(ParseItem registryKey)
+        public Entry(ParseItem registryKey, Document document)
+            : base(registryKey.Span.Start, registryKey.Text, document, ItemType.Entry)
         {
             RegistryKey = registryKey;
         }
@@ -14,13 +15,13 @@ namespace PkgdefLanguage
         public ParseItem RegistryKey { get; }
         public List<Property> Properties { get; } = new();
 
-        public int Start => RegistryKey.Span.Start;
-        public int End => Properties.Any() ? Properties.Last().Value.Span.End : RegistryKey.Span.End;
-        public int Length => End - Start;
-
-        public static implicit operator Span(Entry entry)
+        public override Span Span
         {
-            return Span.FromBounds(entry.Start, entry.End);
+            get
+            {
+                var end = Properties.Any() ? Properties.Last().Value.Span.End : RegistryKey.Span.End;
+                return Span.FromBounds(RegistryKey.Span.Start, end);
+            }
         }
     }
 }
