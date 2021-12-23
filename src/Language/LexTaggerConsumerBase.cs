@@ -5,12 +5,12 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace PkgdefLanguage
 {
-    public abstract class LexTaggerConsumerBase<TTag, TLexTag> : ITagger<TTag>, IDisposable where TTag : ITag where TLexTag : ITag
+    public abstract class LexTaggerConsumerBase<TTag> : ITagger<TTag>, IDisposable where TTag : ITag
     {
-        private readonly ITagAggregator<TLexTag> _lexTags;
+        private readonly ITagAggregator<LexTag> _lexTags;
         private bool _isDisposed;
 
-        public LexTaggerConsumerBase(ITagAggregator<TLexTag> lexTags)
+        public LexTaggerConsumerBase(ITagAggregator<LexTag> lexTags)
         {
             _lexTags = lexTags;
             _lexTags.TagsChanged += LexTagsChanged;
@@ -28,7 +28,7 @@ namespace PkgdefLanguage
         {
             List<ITagSpan<TTag>> list = new();
 
-            foreach (IMappingTagSpan<TLexTag> tagSpan in _lexTags.GetTags(spans))
+            foreach (IMappingTagSpan<LexTag> tagSpan in _lexTags.GetTags(spans))
             {
                 list.AddRange(GetTags(tagSpan));
             }
@@ -36,7 +36,7 @@ namespace PkgdefLanguage
             return list;
         }
 
-        public abstract IEnumerable<ITagSpan<TTag>> GetTags(IMappingTagSpan<TLexTag> span);
+        public abstract IEnumerable<ITagSpan<TTag>> GetTags(IMappingTagSpan<LexTag> span);
 
         public void Dispose()
         {

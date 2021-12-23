@@ -6,13 +6,9 @@
     <TargetFrameworkProfile />
     <LangVersion>10</LangVersion>
     <UseCodebase>true</UseCodebase>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -74,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Community.VisualStudio.Toolkit.16" ExcludeAssets="runtime">
-      <Version>16.0.357</Version>
+      <Version>16.0.359</Version>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
@@ -94,9 +90,8 @@
     <Compile Include="Language\LexTagger.cs" />
     <Compile Include="Language\PredefinedVariables.cs" />
     <Compile Include="Language\ErrorListManager.cs" />
-    <Compile Include="Language\BraceCompletion.cs" />
+    <Compile Include="Language\BasicLanguageFeatures.cs" />
     <Compile Include="Language\ClassificationTagger.cs" />
-    <Compile Include="Language\CompletionCommitManager.cs" />
     <Compile Include="Language\CompletionSource.cs" />
     <Compile Include="Language\ErrorTagger.cs" />
     <Compile Include="Language\Language.cs" />

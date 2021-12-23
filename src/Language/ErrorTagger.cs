@@ -22,7 +22,7 @@ namespace PkgdefLanguage
         }
     }
 
-    public class ErrorTagger : LexTaggerConsumerBase<IErrorTag, LexTag>
+    public class ErrorTagger : LexTaggerConsumerBase<IErrorTag>
     {
         public ErrorTagger(ITagAggregator<LexTag> lexTags) : base(lexTags)
         { }

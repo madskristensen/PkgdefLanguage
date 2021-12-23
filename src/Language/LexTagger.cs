@@ -64,7 +64,7 @@ namespace PkgdefLanguage
                 SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
                 TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
 
-            }, VsTaskRunContext.UIThreadBackgroundPriority);
+            }, VsTaskRunContext.UIThreadIdlePriority);
         }
 
         private void AddTagToList(Dictionary<ParseItem, ITagSpan<LexTag>> list, ParseItem item)
@@ -79,6 +79,7 @@ namespace PkgdefLanguage
             if (!_isDisposed)
             {
                 _document.Processed -= ReParse;
+                _document.Dispose();
             }
 
             _isDisposed = true;

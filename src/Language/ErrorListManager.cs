@@ -92,7 +92,6 @@ namespace PkgdefLanguage
         protected override void Closed(IWpfTextView textView)
         {
             _document.Processed -= ParseErrors;
-            _document.Dispose();
             _dataSource.CleanAllErrors();
         }
     }

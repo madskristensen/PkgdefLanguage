@@ -22,7 +22,7 @@ namespace PkgdefLanguage
         }
     }
 
-    public class StructureTagger : LexTaggerConsumerBase<IStructureTag, LexTag>
+    public class StructureTagger : LexTaggerConsumerBase<IStructureTag>
     {
         public StructureTagger(ITagAggregator<LexTag> lexTags) : base(lexTags)
         { }

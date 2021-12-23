@@ -24,7 +24,7 @@ namespace PkgdefLanguage
         }
     }
 
-    internal class ClassificationTagger : LexTaggerConsumerBase<IClassificationTag, LexTag>
+    internal class ClassificationTagger : LexTaggerConsumerBase<IClassificationTag>
     {
         private static Dictionary<ItemType, ClassificationTag> _map;
 

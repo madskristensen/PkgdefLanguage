@@ -45,8 +45,9 @@ namespace PkgdefLanguage
             if (!_isDisposed)
             {
                 _buffer.Changed -= BufferChanged;
-                _isDisposed = true;
             }
+
+            _isDisposed = true;
         }
     }
 
