@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
@@ -22,6 +23,22 @@ namespace PkgdefLanguage
                 var end = Properties.Any() ? Properties.Last().Value.Span.End : RegistryKey.Span.End;
                 return Span.FromBounds(RegistryKey.Span.Start, end);
             }
+        }
+
+        public string GetFormattedText()
+        {
+            var sb = new StringBuilder();
+
+            if (RegistryKey != null)
+            {
+                sb.AppendLine(RegistryKey.Text.Trim());
+                foreach (Property property in Properties)
+                {
+                    sb.AppendLine($"{property.Name.Text.Trim()}={property.Value.Text.Trim()}");
+                }
+            }
+
+            return sb.ToString().Trim();
         }
     }
 }

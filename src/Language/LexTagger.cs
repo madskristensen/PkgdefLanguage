@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -60,24 +59,12 @@ namespace PkgdefLanguage
                     }
                 }
 
-                UpdateCache(list);
+                _tagsCache = list;
+
+                SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
+                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
 
             }, VsTaskRunContext.UIThreadBackgroundPriority);
-        }
-
-        private void UpdateCache(Dictionary<ParseItem, ITagSpan<LexTag>> list)
-        {
-            IEnumerable<ParseItem> diff = list.Keys.Except(_tagsCache.Keys);
-
-            if (diff.Any())
-            {
-                _tagsCache = list;
-                var start = diff.First().Span.Start;
-                var length = diff.Last().Span.End - start;
-
-                SnapshotSpan span = new(_buffer.CurrentSnapshot, start, length);
-                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
-            }
         }
 
         private void AddTagToList(Dictionary<ParseItem, ITagSpan<LexTag>> list, ParseItem item)

@@ -11,5 +11,6 @@
         Operator,
         Unknown,
         Entry,
+        Property,
     }
 }

@@ -16,11 +16,13 @@ namespace PkgdefLanguage
             Span = new Span(start, Text.Length);
         }
 
+        public List<ParseItem> Children = new();
+
         public ItemType Type { get; }
 
         public virtual Span Span { get; }
 
-        public string Text { get; protected set; }
+        public virtual string Text { get; }
 
         public Document Document { get; }
 
