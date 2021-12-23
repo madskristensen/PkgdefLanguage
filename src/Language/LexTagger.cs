@@ -44,18 +44,8 @@ namespace PkgdefLanguage
 
         private void ReParse(object sender = null, EventArgs e = null)
         {
-            if (_document.IsProcessing)
-            {
-                return;
-            }
-
             ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
             {
-                if (_document.IsProcessing)
-                {
-                    return;
-                }
-
                 Dictionary<ParseItem, ITagSpan<LexTag>> list = new();
 
                 foreach (ParseItem item in _document.Items)
