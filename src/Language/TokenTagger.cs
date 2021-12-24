@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
+using BaseClasses;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -9,34 +11,32 @@ using Microsoft.VisualStudio.Utilities;
 namespace PkgdefLanguage
 {
     [Export(typeof(ITaggerProvider))]
-    [TagType(typeof(LexTag))]
+    [TagType(typeof(TokenTag))]
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
-    internal sealed class LexTaggerProvider : ITaggerProvider
+    internal sealed class TokenTaggerProvider : ITaggerProvider
     {
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag =>
-            buffer.Properties.GetOrCreateSingletonProperty(() => new LexTagger(buffer)) as ITagger<T>;
+            buffer.Properties.GetOrCreateSingletonProperty(() => new TokenTagger(buffer)) as ITagger<T>;
     }
 
-    public record LexTag(ParseItem Item) : ITag;
-
-    internal class LexTagger : ITagger<LexTag>, IDisposable
+    internal class TokenTagger : ITagger<TokenTag>, IDisposable
     {
         private readonly PkgdefDocument _document;
         private readonly ITextBuffer _buffer;
-        private Dictionary<ParseItem, ITagSpan<LexTag>> _tagsCache;
+        private Dictionary<ParseItem, ITagSpan<TokenTag>> _tagsCache;
         private bool _isDisposed;
 
-        internal LexTagger(ITextBuffer buffer)
+        internal TokenTagger(ITextBuffer buffer)
         {
             _buffer = buffer;
             _document = buffer.GetDocument();
             _document.Processed += ReParse;
-            _tagsCache = new Dictionary<ParseItem, ITagSpan<LexTag>>();
+            _tagsCache = new Dictionary<ParseItem, ITagSpan<TokenTag>>();
             ReParse();
         }
 
-        public IEnumerable<ITagSpan<LexTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public IEnumerable<ITagSpan<TokenTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             return _tagsCache.Values;
         }
@@ -45,7 +45,7 @@ namespace PkgdefLanguage
         {
             ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
             {
-                Dictionary<ParseItem, ITagSpan<LexTag>> list = new();
+                Dictionary<ParseItem, ITagSpan<TokenTag>> list = new();
 
                 foreach (ParseItem item in _document.Items)
                 {
@@ -67,10 +67,10 @@ namespace PkgdefLanguage
             }, VsTaskRunContext.UIThreadIdlePriority);
         }
 
-        private void AddTagToList(Dictionary<ParseItem, ITagSpan<LexTag>> list, ParseItem item)
+        private void AddTagToList(Dictionary<ParseItem, ITagSpan<TokenTag>> list, ParseItem item)
         {
             var span = new SnapshotSpan(_buffer.CurrentSnapshot, item);
-            var tag = new TagSpan<LexTag>(span, new LexTag(item));
+            var tag = new TagSpan<TokenTag>(span, new TokenTag(item.Type, item is Entry, item.Errors.ToArray()));
             list.Add(item, tag);
         }
 

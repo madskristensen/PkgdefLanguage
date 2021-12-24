@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace PkgdefLanguage
+namespace BaseClasses
 {
-    public abstract class LexTaggerConsumerBase<TTag> : ITagger<TTag>, IDisposable where TTag : ITag
+    public abstract class TokenTaggerConsumerBase<TTag> : ITagger<TTag>, IDisposable where TTag : ITag
     {
-        private readonly ITagAggregator<LexTag> _lexTags;
+        private readonly ITagAggregator<TokenTag> _tags;
         private bool _isDisposed;
 
-        public LexTaggerConsumerBase(ITagAggregator<LexTag> lexTags)
+        public TokenTaggerConsumerBase(ITagAggregator<TokenTag> tags)
         {
-            _lexTags = lexTags;
-            _lexTags.TagsChanged += LexTagsChanged;
+            _tags = tags;
+            _tags.TagsChanged += TokenTagsChanged;
         }
 
-        private void LexTagsChanged(object sender, TagsChangedEventArgs e)
+        private void TokenTagsChanged(object sender, TagsChangedEventArgs e)
         {
             foreach (SnapshotSpan span in e.Span.GetSpans(e.Span.AnchorBuffer))
             {
@@ -28,7 +28,7 @@ namespace PkgdefLanguage
         {
             List<ITagSpan<TTag>> list = new();
 
-            foreach (IMappingTagSpan<LexTag> tagSpan in _lexTags.GetTags(spans))
+            foreach (IMappingTagSpan<TokenTag> tagSpan in _tags.GetTags(spans))
             {
                 list.AddRange(GetTags(tagSpan));
             }
@@ -36,13 +36,13 @@ namespace PkgdefLanguage
             return list;
         }
 
-        public abstract IEnumerable<ITagSpan<TTag>> GetTags(IMappingTagSpan<LexTag> span);
+        public abstract IEnumerable<ITagSpan<TTag>> GetTags(IMappingTagSpan<TokenTag> span);
 
         public void Dispose()
         {
             if (!_isDisposed)
             {
-                _lexTags.TagsChanged -= LexTagsChanged;
+                _tags.TagsChanged -= TokenTagsChanged;
             }
 
             _isDisposed = true;

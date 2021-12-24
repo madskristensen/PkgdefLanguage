@@ -3,33 +3,28 @@ using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Tagging;
-using Microsoft.VisualStudio.Utilities;
 
-namespace PkgdefLanguage
+namespace BaseClasses
 {
-    [Export(typeof(ITaggerProvider))]
-    [TagType(typeof(IStructureTag))]
-    [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
-    internal sealed class StructureTaggerProvider : ITaggerProvider
+    public abstract class TokenOutliningBaseTagger : ITaggerProvider
     {
         [Import] internal IBufferTagAggregatorFactoryService _bufferTagAggregator = null;
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            ITagAggregator<LexTag> lexTags = _bufferTagAggregator.CreateTagAggregator<LexTag>(buffer);
-            return buffer.Properties.GetOrCreateSingletonProperty(() => new StructureTagger(lexTags)) as ITagger<T>;
+            ITagAggregator<TokenTag> tags = _bufferTagAggregator.CreateTagAggregator<TokenTag>(buffer);
+            return buffer.Properties.GetOrCreateSingletonProperty(() => new StructureTagger(tags)) as ITagger<T>;
         }
     }
 
-    public class StructureTagger : LexTaggerConsumerBase<IStructureTag>
+    internal class StructureTagger : TokenTaggerConsumerBase<IStructureTag>
     {
-        public StructureTagger(ITagAggregator<LexTag> lexTags) : base(lexTags)
+        public StructureTagger(ITagAggregator<TokenTag> tags) : base(tags)
         { }
 
-        public override IEnumerable<ITagSpan<IStructureTag>> GetTags(IMappingTagSpan<LexTag> span)
+        public override IEnumerable<ITagSpan<IStructureTag>> GetTags(IMappingTagSpan<TokenTag> span)
         {
-            if (span.Tag.Item is not Entry entry)
+            if (!span.Tag.SupportOutlining)
             {
                 yield break;
             }
@@ -38,7 +33,7 @@ namespace PkgdefLanguage
 
             foreach (SnapshotSpan tagSpan in tagSpans)
             {
-                yield return CreateTag(tagSpan, entry.RegistryKey.Text.Trim());
+                yield return CreateTag(tagSpan, tagSpan.GetText().Trim());
             }
         }
 
