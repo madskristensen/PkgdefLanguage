@@ -70,7 +70,7 @@ namespace PkgdefLanguage
         private void AddTagToList(Dictionary<ParseItem, ITagSpan<TokenTag>> list, ParseItem item)
         {
             var span = new SnapshotSpan(_buffer.CurrentSnapshot, item);
-            var tag = new TagSpan<TokenTag>(span, new TokenTag(item.Type, item is Entry, item.Errors.ToArray()));
+            var tag = new TagSpan<TokenTag>(span, new TokenTag(item.Type, item is Entry, item.Errors.Select(e => e.Message).ToArray()));
             list.Add(item, tag);
         }
 

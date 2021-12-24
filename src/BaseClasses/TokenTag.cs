@@ -16,6 +16,6 @@ namespace BaseClasses
         public virtual object TokenType { get; set; }
         public virtual bool SupportOutlining { get; set; }
         public virtual IList<string> ErrorMessages { get; set; }
-        public virtual bool IsValid => ErrorMessages?.Any() == true;
+        public virtual bool IsValid => ErrorMessages?.Any() == false;
     }
 }

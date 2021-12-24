@@ -7,6 +7,16 @@ namespace PkgdefLanguage
     {
         public bool IsValid { get; set; }
 
+        private class Errors
+        {
+            public static Error PL001 { get; } = new("PL001", "Unknown token at this location", ErrorSeverity.Error);
+            public static Error PL002 { get; } = new("PL002", "Unclosed registry key entry.Add the missing ] character", ErrorSeverity.Error);
+            public static Error PL003 { get; } = new("PL003", "Use the backslash character as delimiter instead of forward slash.", ErrorSeverity.Error);
+            public static Error PL004 { get; } = new("PL004", "To set a registry key's default value, use '@' without quotation marks", ErrorSeverity.Warning);
+            public static Error PL005 { get; } = new("PL005", "Value names must be enclosed in quotation marks.", ErrorSeverity.Error);
+            public static Error PL006 { get; } = new("PL006", "The variable \"{0}\" doens't exist.", ErrorSeverity.Warning);
+        }
+
         private void ValidateDocument()
         {
             IsValid = true;
@@ -16,7 +26,7 @@ namespace PkgdefLanguage
                 // Unknown symbols
                 if (item.Type == ItemType.Unknown)
                 {
-                    item.AddError("Unknown token at this location.");
+                    item.AddError(Errors.PL001);
                 }
 
                 // Registry key
@@ -26,11 +36,11 @@ namespace PkgdefLanguage
 
                     if (!trimmedText.EndsWith("]"))
                     {
-                        item.AddError("Unclosed registry key entry. Add the missing ] character");
+                        item.AddError(Errors.PL002);
                     }
                     else if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
                     {
-                        item.AddError("Use the backslash character as delimiter instead of forward slash.");
+                        item.AddError(Errors.PL003);
                     }
                 }
 
@@ -44,12 +54,12 @@ namespace PkgdefLanguage
                     {
                         if (name.Text == "\"@\"")
                         {
-                            name.AddError("To set a registry key's default value, use '@' without quotation marks");
+                            name.AddError(Errors.PL004);
                         }
                     }
                     else if (name?.Type == ItemType.Literal && name?.Text != "@")
                     {
-                        name.AddError("Value names must be enclosed in quotation marks.");
+                        name.AddError(Errors.PL005);
                     }
                 }
 
@@ -58,7 +68,7 @@ namespace PkgdefLanguage
                 {
                     if (!item.Text.EndsWith("\""))
                     {
-                        item.AddError("Value names must be enclosed in quotation marks.");
+                        item.AddError(Errors.PL005);
                     }
                 }
 
@@ -67,7 +77,7 @@ namespace PkgdefLanguage
                 {
                     if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(reference.Value.Text, StringComparison.OrdinalIgnoreCase)))
                     {
-                        reference.Value.AddError($"The variable \"{reference.Value.Text}\" doens't exist.");
+                        reference.Value.AddError(Errors.PL006.WithFormat(reference.Value.Text));
                     }
                 }
             }

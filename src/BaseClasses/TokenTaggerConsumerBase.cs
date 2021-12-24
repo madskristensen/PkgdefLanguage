@@ -28,9 +28,12 @@ namespace BaseClasses
         {
             List<ITagSpan<TTag>> list = new();
 
-            foreach (IMappingTagSpan<TokenTag> tagSpan in _tags.GetTags(spans))
+            if (!spans[0].IsEmpty)
             {
-                list.AddRange(GetTags(tagSpan));
+                foreach (IMappingTagSpan<TokenTag> tagSpan in _tags.GetTags(spans))
+                {
+                    list.AddRange(GetTags(tagSpan));
+                }
             }
 
             return list;
@@ -38,14 +41,23 @@ namespace BaseClasses
 
         public abstract IEnumerable<ITagSpan<TTag>> GetTags(IMappingTagSpan<TokenTag> span);
 
-        public void Dispose()
+        public virtual void Dispose(bool disposing)
         {
             if (!_isDisposed)
             {
-                _tags.TagsChanged -= TokenTagsChanged;
-            }
+                if (disposing)
+                {
+                    _tags.TagsChanged -= TokenTagsChanged;
+                }
 
-            _isDisposed = true;
+                _isDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;

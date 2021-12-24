@@ -4,9 +4,36 @@ using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
+    public class Error
+    {
+        public Error(string errorCode, string message, ErrorSeverity severity)
+        {
+            ErrorCode = errorCode;
+            Message = message;
+            Severity = severity;
+        }
+
+        public string ErrorCode { get; }
+        public string Message { get; private set; }
+        public ErrorSeverity Severity { get; }
+
+        public Error WithFormat(params string[] replacements)
+        {
+            Message = string.Format(Message, replacements);
+            return this;
+        }
+    }
+
+    public enum ErrorSeverity
+    {
+        Message,
+        Warning,
+        Error
+    }
+
     public class ParseItem
     {
-        public HashSet<string> _errors = new();
+        public HashSet<Error> _errors = new();
 
         public ParseItem(int start, string text, Document document, ItemType type)
         {
@@ -28,11 +55,11 @@ namespace PkgdefLanguage
 
         public List<Reference> References { get; } = new();
 
-        public IEnumerable<string> Errors => _errors;
+        public IEnumerable<Error> Errors => _errors;
 
         public bool IsValid => _errors.Count == 0;
 
-        public void AddError(string error)
+        public void AddError(Error error)
         {
             Document.IsValid = false;
             _errors.Add(error);

@@ -25,18 +25,19 @@ namespace BaseClasses
 
         public override IEnumerable<ITagSpan<IErrorTag>> GetTags(IMappingTagSpan<TokenTag> span)
         {
-            if (!span.Tag.IsValid)
+            if (span.Tag.IsValid)
             {
                 yield break;
             }
 
             NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
+            var tooltip = string.Join(Environment.NewLine, span.Tag.ErrorMessages);
+            var errorTag = new ErrorTag(PredefinedErrorTypeNames.SyntaxError, tooltip);
 
             foreach (SnapshotSpan tagSpan in tagSpans)
             {
-                var tooltip = string.Join(Environment.NewLine, span.Tag.ErrorMessages);
-                var errorTag = new ErrorTag(PredefinedErrorTypeNames.SyntaxError, tooltip);
                 yield return new TagSpan<IErrorTag>(tagSpan, errorTag);
+
             }
         }
     }

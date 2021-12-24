@@ -24,7 +24,8 @@ namespace PkgdefLanguage
         {
             _docView = docView;
             _project = await VS.Solutions.GetActiveProjectAsync();
-            _dataSource = new TableDataSource(Constants.LanguageName, Constants.LanguageName);
+            _dataSource = new TableDataSource(Constants.LanguageName);
+
             _document = docView.TextBuffer.GetDocument();
             _document.Processed += ParseErrors;
 
@@ -64,8 +65,7 @@ namespace PkgdefLanguage
                     }
                 }
 
-                _dataSource.CleanAllErrors();
-                _dataSource.AddErrors(_project?.Name ?? "", errors);
+                _dataSource.AddErrors(errors);
             }, VsTaskRunContext.UIThreadBackgroundPriority);
         }
 
@@ -73,20 +73,31 @@ namespace PkgdefLanguage
         {
             ITextSnapshotLine line = _docView.TextBuffer.CurrentSnapshot.GetLineFromPosition(item.Span.Start);
 
-            foreach (var error in item.Errors)
+            foreach (Error error in item.Errors)
             {
                 yield return new ErrorListItem
                 {
                     ProjectName = _project?.Name ?? "",
                     FileName = _docView.FilePath,
-                    Message = error,
+                    Message = error.Message,
                     ErrorCategory = "syntax",
-                    Severity = __VSERRORCATEGORY.EC_WARNING,
+                    Severity = GetVsCategory(error.Severity),
                     Line = line.LineNumber,
                     Column = item.Span.Start - line.Start.Position,
                     BuildTool = Vsix.Name,
+                    ErrorCode = error.ErrorCode
                 };
             }
+        }
+
+        private __VSERRORCATEGORY GetVsCategory(ErrorSeverity category)
+        {
+            return category switch
+            {
+                ErrorSeverity.Message => __VSERRORCATEGORY.EC_MESSAGE,
+                ErrorSeverity.Warning => __VSERRORCATEGORY.EC_WARNING,
+                _ => __VSERRORCATEGORY.EC_ERROR,
+            };
         }
 
         protected override void Closed(IWpfTextView textView)
@@ -95,4 +106,6 @@ namespace PkgdefLanguage
             _dataSource.CleanAllErrors();
         }
     }
+
+
 }
