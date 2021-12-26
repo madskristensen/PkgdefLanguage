@@ -1,35 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
-    public class Error
-    {
-        public Error(string errorCode, string message, ErrorSeverity severity)
-        {
-            ErrorCode = errorCode;
-            Message = message;
-            Severity = severity;
-        }
-
-        public string ErrorCode { get; }
-        public string Message { get; }
-        public ErrorSeverity Severity { get; }
-
-        public Error WithFormat(params string[] replacements)
-        {
-            return new Error(ErrorCode, string.Format(Message, replacements), Severity);
-        }
-    }
-
-    public enum ErrorSeverity
-    {
-        Message,
-        Warning,
-        Error
-    }
-
     public class ParseItem
     {
         public HashSet<Error> _errors = new();
@@ -54,15 +29,9 @@ namespace PkgdefLanguage
 
         public List<Reference> References { get; } = new();
 
-        public IEnumerable<Error> Errors => _errors;
+        public ICollection<Error> Errors => _errors;
 
         public bool IsValid => _errors.Count == 0;
-
-        public void AddError(Error error)
-        {
-            Document.IsValid = false;
-            _errors.Add(error);
-        }
 
         public ParseItem Previous
         {
@@ -107,6 +76,25 @@ namespace PkgdefLanguage
                    Type == item.Type &&
                    EqualityComparer<Span>.Default.Equals(Span, item.Span) &&
                    Text == item.Text;
+        }
+    }
+
+    public class Error
+    {
+        public Error(string errorCode, string message, __VSERRORCATEGORY severity)
+        {
+            ErrorCode = errorCode;
+            Message = message;
+            Severity = severity;
+        }
+
+        public string ErrorCode { get; }
+        public string Message { get; }
+        public __VSERRORCATEGORY Severity { get; }
+
+        public Error WithFormat(params string[] replacements)
+        {
+            return new Error(ErrorCode, string.Format(Message, replacements), Severity);
         }
     }
 }

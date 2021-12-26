@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using BaseClasses;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Language.StandardClassification;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -40,6 +41,15 @@ namespace PkgdefLanguage
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
     public class ErrorSquigglies : TokenErrorBaseTagger
+    {
+
+    }
+
+    [Export(typeof(IWpfTextViewCreationListener))]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
+    [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
+    internal sealed class ErrorList : TokenErrorListBase
     {
 
     }

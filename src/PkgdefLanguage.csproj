@@ -53,7 +53,6 @@
       <Link>Resources\LICENSE</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Parser\readme.txt" />
     <Content Include="Resources\Icon.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -91,12 +90,12 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Language\TokenTagger.cs" />
     <Compile Include="Language\PredefinedVariables.cs" />
-    <Compile Include="Language\ErrorListManager.cs" />
+    <Compile Include="BaseClasses\TokenErrorListBase.cs" />
     <Compile Include="Language\BasicLanguageFeatures.cs" />
     <Compile Include="BaseClasses\TokenClassificationBaseTagger.cs" />
     <Compile Include="Language\CompletionSource.cs" />
     <Compile Include="BaseClasses\TokenErrorBaseTagger.cs" />
-    <Compile Include="Language\Language.cs" />
+    <Compile Include="Language\LanguageFactory.cs" />
     <Compile Include="BaseClasses\TokenQuickInfoBase.cs" />
     <Compile Include="BaseClasses\TokenOutliningBaseTagger.cs" />
     <Compile Include="Parser\Document.cs" />
@@ -108,7 +107,6 @@
     <Compile Include="Parser\Reference.cs" />
     <Compile Include="Parser\Entry.cs" />
     <Compile Include="PkgdefPackage.cs" />
-    <Compile Include="PkgdefDocument.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

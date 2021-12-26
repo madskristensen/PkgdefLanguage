@@ -23,20 +23,24 @@ namespace BaseClasses
         public ErrorTagger(ITagAggregator<TokenTag> tags) : base(tags)
         { }
 
-        public override IEnumerable<ITagSpan<IErrorTag>> GetTags(IMappingTagSpan<TokenTag> span)
+        public override IEnumerable<ITagSpan<IErrorTag>> GetTags(IMappingTagSpan<TokenTag> tagSpan)
         {
-            if (span.Tag.IsValid)
+            if (tagSpan.Tag.IsValid)
             {
                 yield break;
             }
 
-            NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
-            var tooltip = string.Join(Environment.NewLine, span.Tag.ErrorMessages);
+            NormalizedSnapshotSpanCollection spans = tagSpan.Span.GetSpans(tagSpan.Span.AnchorBuffer.CurrentSnapshot);
+            var tooltip = string.Join(Environment.NewLine, tagSpan.Tag.Errors);
             var errorTag = new ErrorTag(PredefinedErrorTypeNames.SyntaxError, tooltip);
 
-            foreach (SnapshotSpan tagSpan in tagSpans)
+            foreach (SnapshotSpan span in spans)
             {
-                yield return new TagSpan<IErrorTag>(tagSpan, errorTag);
+                yield return new TagSpan<IErrorTag>(span, errorTag);
+            }
+
+            if (IsFullParse)
+            {
 
             }
         }

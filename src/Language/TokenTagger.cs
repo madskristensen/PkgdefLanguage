@@ -26,7 +26,7 @@ namespace PkgdefLanguage
 
     internal class TokenTagger : ITagger<TokenTag>, IDisposable
     {
-        private readonly PkgdefDocument _document;
+        private readonly Document _document;
         private readonly ITextBuffer _buffer;
         private Dictionary<ParseItem, ITagSpan<TokenTag>> _tagsCache;
         private static readonly ImageId _errorIcon = KnownMonikers.StatusWarningNoColor.ToImageId();
@@ -76,9 +76,30 @@ namespace PkgdefLanguage
         {
             var span = new SnapshotSpan(_buffer.CurrentSnapshot, item);
             Func<SnapshotPoint, Task<object>> func = !item.IsValid ? GetTooltipAsync : null;
-            var tag = new TokenTag(item.Type, item is Entry, func, item.Errors.Select(e => e.Message).ToArray());
+            var tag = new TokenTag(item.Type, item is Entry, func, CreateErrorListItem(item).ToArray());
             var tagSpan = new TagSpan<TokenTag>(span, tag);
             list.Add(item, tagSpan);
+        }
+
+        private IEnumerable<ErrorListItem> CreateErrorListItem(ParseItem item)
+        {
+            ITextSnapshotLine line = _buffer.CurrentSnapshot.GetLineFromPosition(item.Span.Start);
+
+            foreach (Error error in item.Errors)
+            {
+                yield return new ErrorListItem
+                {
+                    ProjectName = _document.ProjectName ?? "",
+                    FileName = _document.FileName,
+                    Message = error.Message,
+                    ErrorCategory = PredefinedErrorTypeNames.SyntaxError,
+                    Severity = error.Severity,
+                    Line = line.LineNumber,
+                    Column = item.Span.Start - line.Start.Position,
+                    BuildTool = Vsix.Name,
+                    ErrorCode = error.ErrorCode
+                };
+            }
         }
 
         private Task<object> GetTooltipAsync(SnapshotPoint triggerPoint)

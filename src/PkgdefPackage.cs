@@ -14,18 +14,18 @@ namespace PkgdefLanguage
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
 
-    [ProvideLanguageService(typeof(Language), Constants.LanguageName, 0, EnableLineNumbers = true, MatchBraces = true, MatchBracesAtCaret = true, EnableAsyncCompletion = true, EnableCommenting = true, ShowCompletion = true, ShowMatchingBrace = true)]
-    [ProvideLanguageExtension(typeof(Language), Constants.PkgDefExt)]
-    [ProvideLanguageExtension(typeof(Language), Constants.PkgUndefExt)]
+    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, EnableLineNumbers = true, MatchBraces = true, MatchBracesAtCaret = true, EnableAsyncCompletion = true, EnableCommenting = true, ShowCompletion = true, ShowMatchingBrace = true)]
+    [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgDefExt)]
+    [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgUndefExt)]
     [ProvideFileIcon(Constants.PkgDefExt, "KnownMonikers.RegistrationScript")]
     [ProvideFileIcon(Constants.PkgUndefExt, "KnownMonikers.RegistrationScript")]
-    [ProvideEditorFactory(typeof(Language), 0, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
-    [ProvideEditorLogicalView(typeof(Language), VSConstants.LOGVIEWID.TextView_string, IsTrusted = true)]
+    [ProvideEditorFactory(typeof(LanguageFactory), 0, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
+    [ProvideEditorLogicalView(typeof(LanguageFactory), VSConstants.LOGVIEWID.TextView_string, IsTrusted = true)]
     public sealed class PkgdefPackage : ToolkitPackage
     {
         protected override Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            RegisterEditorFactory(new Language(this));
+            RegisterEditorFactory(new LanguageFactory(this));
             return Task.CompletedTask;
         }
     }

@@ -19,7 +19,7 @@ namespace PkgdefLanguage
 
         public bool ExecuteCommand(FormatSelectionCommandArgs args, CommandExecutionContext executionContext)
         {
-            PkgdefDocument doc = args.SubjectBuffer.GetDocument();
+            Document doc = args.SubjectBuffer.GetDocument();
             SnapshotPoint position = args.TextView.Selection.Start.Position;
             ParseItem item = doc.Items.FirstOrDefault(i => i.Type == ItemType.Entry && i.Span.Contains(position));
 

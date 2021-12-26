@@ -9,12 +9,12 @@ namespace BaseClasses
 {
     public class TokenTag : ITag
     {
-        public TokenTag(object tokenType, bool supportOutlining, Func<SnapshotPoint, Task<object>> getTooltipAsync, params string[] errorMessages)
+        public TokenTag(object tokenType, bool supportOutlining, Func<SnapshotPoint, Task<object>> getTooltipAsync, params ErrorListItem[] errors)
         {
             TokenType = tokenType;
             SupportOutlining = supportOutlining;
             GetTooltipAsync = getTooltipAsync;
-            ErrorMessages = errorMessages;
+            Errors = errors;
         }
 
         public TokenTag(object tokenType)
@@ -27,8 +27,8 @@ namespace BaseClasses
 
         public virtual object TokenType { get; set; }
         public virtual bool SupportOutlining { get; set; }
-        public virtual IList<string> ErrorMessages { get; set; }
-        public virtual bool IsValid => ErrorMessages?.Any() == false;
+        public virtual IList<ErrorListItem> Errors { get; set; }
+        public virtual bool IsValid => Errors?.Any() == false;
         public virtual Func<SnapshotPoint, Task<object>> GetTooltipAsync { get; set; }
     }
 }

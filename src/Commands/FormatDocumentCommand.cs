@@ -18,7 +18,7 @@ namespace PkgdefLanguage
 
         public bool ExecuteCommand(FormatDocumentCommandArgs args, CommandExecutionContext executionContext)
         {
-            PkgdefDocument doc = args.SubjectBuffer.GetDocument();
+            Document doc = args.SubjectBuffer.GetDocument();
             var sb = new StringBuilder();
 
             foreach (ParseItem item in doc.Items)

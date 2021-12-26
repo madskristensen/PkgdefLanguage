@@ -61,7 +61,7 @@ namespace PkgdefLanguage
             foreach (var key in PredefinedVariables.Variables.Keys)
             {
                 var completion = new CompletionItem(key, this, _referenceIcon, ImmutableArray<CompletionFilter>.Empty, "", $"${key}$", key, key, ImmutableArray<ImageElement>.Empty);
-                completion.Properties.AddProperty("description", PredefinedVariables.Variables[key].Trim());
+                completion.Properties.AddProperty("description", PredefinedVariables.Variables[key]);
                 items.Add(completion);
             }
 
