@@ -84,7 +84,7 @@
     <Compile Include="Commands\FormatSelectionCommand.cs" />
     <Compile Include="Commands\FormatDocumentCommand.cs" />
     <Compile Include="BaseClasses\TokenTaggerConsumerBase.cs" />
-    <Compile Include="Language\TokenizedTaggers.cs" />
+    <Compile Include="Language\TokenLanguageFeatures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\CommentCommand.cs" />
     <Compile Include="Commands\UncommentCommand.cs" />
@@ -97,7 +97,7 @@
     <Compile Include="Language\CompletionSource.cs" />
     <Compile Include="BaseClasses\TokenErrorBaseTagger.cs" />
     <Compile Include="Language\Language.cs" />
-    <Compile Include="Language\QuickInfoSource.cs" />
+    <Compile Include="BaseClasses\TokenQuickInfoBase.cs" />
     <Compile Include="BaseClasses\TokenOutliningBaseTagger.cs" />
     <Compile Include="Parser\Document.cs" />
     <Compile Include="Parser\DocumentParser.cs" />

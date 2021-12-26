@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading.Tasks;
 using BaseClasses;
+using Microsoft.VisualStudio.Core.Imaging;
+using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -25,6 +29,7 @@ namespace PkgdefLanguage
         private readonly PkgdefDocument _document;
         private readonly ITextBuffer _buffer;
         private Dictionary<ParseItem, ITagSpan<TokenTag>> _tagsCache;
+        private static readonly ImageId _errorIcon = KnownMonikers.StatusWarningNoColor.ToImageId();
         private bool _isDisposed;
 
         internal TokenTagger(ITextBuffer buffer)
@@ -70,8 +75,28 @@ namespace PkgdefLanguage
         private void AddTagToList(Dictionary<ParseItem, ITagSpan<TokenTag>> list, ParseItem item)
         {
             var span = new SnapshotSpan(_buffer.CurrentSnapshot, item);
-            var tag = new TagSpan<TokenTag>(span, new TokenTag(item.Type, item is Entry, item.Errors.Select(e => e.Message).ToArray()));
-            list.Add(item, tag);
+            Func<SnapshotPoint, Task<object>> func = !item.IsValid ? GetTooltipAsync : null;
+            var tag = new TokenTag(item.Type, item is Entry, func, item.Errors.Select(e => e.Message).ToArray());
+            var tagSpan = new TagSpan<TokenTag>(span, tag);
+            list.Add(item, tagSpan);
+        }
+
+        private Task<object> GetTooltipAsync(SnapshotPoint triggerPoint)
+        {
+            ParseItem item = _document.GetTokenFromPosition(triggerPoint.Position);
+
+            // Error messages
+            if (item?.IsValid == false)
+            {
+                var elm = new ContainerElement(
+                    ContainerElementStyle.Wrapped,
+                    new ImageElement(_errorIcon),
+                    string.Join(Environment.NewLine, item.Errors.Select(e => e.Message)));
+
+                return Task.FromResult<object>(elm);
+            }
+
+            return Task.FromResult<object>(null);
         }
 
         public void Dispose()

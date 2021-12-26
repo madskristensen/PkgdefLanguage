@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using BaseClasses;
+using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
@@ -39,6 +40,14 @@ namespace PkgdefLanguage
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
     public class ErrorSquigglies : TokenErrorBaseTagger
+    {
+
+    }
+
+    [Export(typeof(IAsyncQuickInfoSourceProvider))]
+    [ContentType(Constants.LanguageName)]
+    [Name(Constants.LanguageName)]
+    internal sealed class Tooltips : TokenQuickInfoBase
     {
 
     }

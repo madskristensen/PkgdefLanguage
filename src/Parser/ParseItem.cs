@@ -14,13 +14,12 @@ namespace PkgdefLanguage
         }
 
         public string ErrorCode { get; }
-        public string Message { get; private set; }
+        public string Message { get; }
         public ErrorSeverity Severity { get; }
 
         public Error WithFormat(params string[] replacements)
         {
-            Message = string.Format(Message, replacements);
-            return this;
+            return new Error(ErrorCode, string.Format(Message, replacements), Severity);
         }
     }
 
