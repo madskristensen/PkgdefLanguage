@@ -10,8 +10,6 @@ namespace BaseClasses
         private readonly ITagAggregator<TokenTag> _tags;
         private bool _isDisposed;
 
-        public bool IsFullParse { get; private set; }
-
         public TokenTaggerConsumerBase(ITagAggregator<TokenTag> tags)
         {
             _tags = tags;
@@ -20,12 +18,10 @@ namespace BaseClasses
 
         private void TokenTagsChanged(object sender, TagsChangedEventArgs e)
         {
-            ITextBuffer buffer = e.Span.AnchorBuffer;
+            ITextBuffer buffer = e.Span.BufferGraph.TopBuffer;
             SnapshotSpan span = new(buffer.CurrentSnapshot, 0, buffer.CurrentSnapshot.Length);
 
-            IsFullParse = true;
             TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
-            IsFullParse = false;
         }
 
         public IEnumerable<ITagSpan<TTag>> GetTags(NormalizedSnapshotSpanCollection spans)

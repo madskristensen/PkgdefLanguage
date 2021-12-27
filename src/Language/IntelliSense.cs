@@ -113,13 +113,18 @@ namespace PkgdefLanguage
                 var column = triggerLocation.Position - item.Span.Start;
                 var start = item.Text.LastIndexOf('\\', column - 1) + 1;
                 var end = item.Text.IndexOf('\\', column);
-                end = end >= start ? end : item.Text.IndexOf(']', column);
-                end = end >= start ? end : item.Text.TrimEnd().Length;
+                var close = item.Text.IndexOf(']', column);
+                var textEnd = item.Text.IndexOf(']', column);
+                end = end >= start ? end : close;
+                end = end >= start ? end : textEnd;
 
                 if (end >= start)
                 {
-                    var span = new SnapshotSpan(triggerLocation.Snapshot, item.Span.Start + start, end - start);
-                    return new CompletionStartData(CompletionParticipation.ProvidesItems, span);
+                    if (close == -1 || column <= close)
+                    {
+                        var span = new SnapshotSpan(triggerLocation.Snapshot, item.Span.Start + start, end - start);
+                        return new CompletionStartData(CompletionParticipation.ProvidesItems, span);
+                    }
                 }
             }
 

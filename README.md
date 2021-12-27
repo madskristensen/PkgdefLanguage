@@ -30,3 +30,8 @@ Collapse sections for better overview of the document.
 ![Outlining](art/outlining.png)
 
 Notice how only comments starting with a semicolon is correctly identified as a comment.
+
+## Formatting
+You can format the whole document `Ctrl+K,Ctrl+D` or the current selection `Ctrl+K,Ctrl+F`. It will add a line break between registry key entries, trim whitespace, and other clean-up formatting.
+
+![Formatting](art/formatting.png)

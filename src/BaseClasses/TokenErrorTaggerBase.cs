@@ -38,11 +38,6 @@ namespace BaseClasses
             {
                 yield return new TagSpan<IErrorTag>(span, errorTag);
             }
-
-            if (IsFullParse)
-            {
-
-            }
         }
     }
 }

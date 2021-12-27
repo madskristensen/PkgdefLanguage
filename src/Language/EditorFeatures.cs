@@ -14,7 +14,6 @@ namespace PkgdefLanguage
     [Export(typeof(ITaggerProvider))]
     [TagType(typeof(IClassificationTag))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     public class SyntaxHighligting : TokenClassificationTaggerBase
     {
         public override Dictionary<object, string> ClassificationMap { get; } = new()
@@ -31,27 +30,23 @@ namespace PkgdefLanguage
     [Export(typeof(ITaggerProvider))]
     [TagType(typeof(IStructureTag))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     public class Outlining : TokenOutliningTaggerBase
     { }
 
     [Export(typeof(ITaggerProvider))]
     [TagType(typeof(IErrorTag))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     public class ErrorSquigglies : TokenErrorTaggerBase
     { }
 
     [Export(typeof(IWpfTextViewCreationListener))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
     internal sealed class ErrorList : TokenErrorListBase
     { }
 
     [Export(typeof(IAsyncQuickInfoSourceProvider))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     internal sealed class Tooltips : TokenQuickInfoBase
     { }
 
@@ -62,14 +57,12 @@ namespace PkgdefLanguage
     [BracePair('"', '"')]
     [BracePair('$', '$')]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     [ProvideBraceCompletion(Constants.LanguageName)]
     internal sealed class BraceCompletion : BraceCompletionBase
     { }
 
     [Export(typeof(IAsyncCompletionCommitManagerProvider))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     internal sealed class CompletionCommitManager : CompletionCommitManagerBase
     {
         public override IEnumerable<char> CommitChars => new char[] { ' ', '\'', '"', ',', '.', ';', ':', '\\', '$' };
@@ -78,7 +71,6 @@ namespace PkgdefLanguage
     [Export(typeof(IViewTaggerProvider))]
     [TagType(typeof(TextMarkerTag))]
     [ContentType(Constants.LanguageName)]
-    [Name(Constants.LanguageName)]
     internal sealed class BraceMatchingTaggerProvider : BraceMatchingBase
     {
         // This will match parenthesis, curly brackets, and square brackets by default.
