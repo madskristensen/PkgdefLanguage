@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -22,18 +23,16 @@ namespace BaseClasses
         public StructureTagger(ITagAggregator<TokenTag> tags) : base(tags)
         { }
 
-        public override IEnumerable<ITagSpan<IStructureTag>> GetTags(IMappingTagSpan<TokenTag> span)
+        public override IEnumerable<ITagSpan<IStructureTag>> GetTags(NormalizedSnapshotSpanCollection spans, bool isFullParse)
         {
-            if (!span.Tag.SupportOutlining)
+            foreach (IMappingTagSpan<TokenTag> tag in Tags.GetTags(spans).Where(t => t.Tag.SupportOutlining))
             {
-                yield break;
-            }
+                NormalizedSnapshotSpanCollection tagSpans = tag.Span.GetSpans(tag.Span.AnchorBuffer.CurrentSnapshot);
 
-            NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
-
-            foreach (SnapshotSpan tagSpan in tagSpans)
-            {
-                yield return CreateTag(tagSpan, tagSpan.GetText().Trim());
+                foreach (SnapshotSpan tagSpan in tagSpans)
+                {
+                    yield return CreateTag(tagSpan, tagSpan.GetText().Trim());
+                }
             }
         }
 

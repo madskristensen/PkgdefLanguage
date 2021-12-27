@@ -16,7 +16,7 @@ namespace BaseClasses
         public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer buffer)
         {
             ITagAggregator<TokenTag> tags = _bufferTagAggregator.CreateTagAggregator<TokenTag>(buffer);
-            return buffer.Properties.GetOrCreateSingletonProperty(() => new TokenQuickInfo(buffer, tags));
+            return buffer.Properties.GetOrCreateSingletonProperty(() => new TokenQuickInfo(tags));
         }
     }
 
@@ -25,9 +25,9 @@ namespace BaseClasses
         private readonly ITextBuffer _buffer;
         private readonly ITagAggregator<TokenTag> _tags;
 
-        public TokenQuickInfo(ITextBuffer buffer, ITagAggregator<TokenTag> tags)
+        public TokenQuickInfo(ITagAggregator<TokenTag> tags)
         {
-            _buffer = buffer;
+            _buffer = tags.BufferGraph.TopBuffer;
             _tags = tags;
         }
 

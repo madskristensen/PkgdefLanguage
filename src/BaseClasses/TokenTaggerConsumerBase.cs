@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 
@@ -7,14 +8,15 @@ namespace BaseClasses
 {
     public abstract class TokenTaggerConsumerBase<TTag> : ITagger<TTag>, IDisposable where TTag : ITag
     {
-        private readonly ITagAggregator<TokenTag> _tags;
         private bool _isDisposed;
 
         public TokenTaggerConsumerBase(ITagAggregator<TokenTag> tags)
         {
-            _tags = tags;
-            _tags.TagsChanged += TokenTagsChanged;
+            Tags = tags;
+            Tags.TagsChanged += TokenTagsChanged;
         }
+
+        public ITagAggregator<TokenTag> Tags { get; }
 
         private void TokenTagsChanged(object sender, TagsChangedEventArgs e)
         {
@@ -26,20 +28,16 @@ namespace BaseClasses
 
         public IEnumerable<ITagSpan<TTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            List<ITagSpan<TTag>> list = new();
-
-            if (!spans[0].IsEmpty)
+            if (spans[0].IsEmpty)
             {
-                foreach (IMappingTagSpan<TokenTag> tagSpan in _tags.GetTags(spans))
-                {
-                    list.AddRange(GetTags(tagSpan));
-                }
+                return null;
             }
 
-            return list;
+            var isFullParse = spans.First().Start == 0 && spans.Last().End == spans[0].Snapshot.Length;
+            return GetTags(spans, isFullParse);
         }
 
-        public abstract IEnumerable<ITagSpan<TTag>> GetTags(IMappingTagSpan<TokenTag> span);
+        public abstract IEnumerable<ITagSpan<TTag>> GetTags(NormalizedSnapshotSpanCollection spans, bool isFullParse);
 
         public virtual void Dispose(bool disposing)
         {
@@ -47,7 +45,7 @@ namespace BaseClasses
             {
                 if (disposing)
                 {
-                    _tags.TagsChanged -= TokenTagsChanged;
+                    Tags.TagsChanged -= TokenTagsChanged;
                 }
 
                 _isDisposed = true;

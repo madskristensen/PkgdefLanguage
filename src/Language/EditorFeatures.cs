@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.BraceCompletion;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -37,12 +36,6 @@ namespace PkgdefLanguage
     [TagType(typeof(IErrorTag))]
     [ContentType(Constants.LanguageName)]
     public class ErrorSquigglies : TokenErrorTaggerBase
-    { }
-
-    [Export(typeof(IWpfTextViewCreationListener))]
-    [ContentType(Constants.LanguageName)]
-    [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
-    internal sealed class ErrorList : TokenErrorListBase
     { }
 
     [Export(typeof(IAsyncQuickInfoSourceProvider))]

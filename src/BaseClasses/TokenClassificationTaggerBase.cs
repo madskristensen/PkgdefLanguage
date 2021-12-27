@@ -35,15 +35,18 @@ namespace BaseClasses
 
         }
 
-        public override IEnumerable<ITagSpan<IClassificationTag>> GetTags(IMappingTagSpan<TokenTag> span)
+        public override IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans, bool isFullParse)
         {
-            if (_classificationMap.TryGetValue(span.Tag.TokenType, out ClassificationTag classificationTag))
+            foreach (IMappingTagSpan<TokenTag> tag in Tags.GetTags(spans))
             {
-                NormalizedSnapshotSpanCollection tagSpans = span.Span.GetSpans(span.Span.AnchorBuffer.CurrentSnapshot);
-
-                foreach (SnapshotSpan tagSpan in tagSpans)
+                if (_classificationMap.TryGetValue(tag.Tag.TokenType, out ClassificationTag classificationTag))
                 {
-                    yield return new TagSpan<ClassificationTag>(tagSpan, classificationTag);
+                    NormalizedSnapshotSpanCollection tagSpans = tag.Span.GetSpans(tag.Span.AnchorBuffer.CurrentSnapshot);
+
+                    foreach (SnapshotSpan tagSpan in tagSpans)
+                    {
+                        yield return new TagSpan<ClassificationTag>(tagSpan, classificationTag);
+                    }
                 }
             }
         }

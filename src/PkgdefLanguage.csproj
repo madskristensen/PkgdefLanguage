@@ -89,7 +89,6 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Language\TokenTagger.cs" />
     <Compile Include="Language\PredefinedVariables.cs" />
-    <Compile Include="BaseClasses\TokenErrorListBase.cs" />
     <Compile Include="Language\EditorFeatures.cs" />
     <Compile Include="BaseClasses\TokenClassificationTaggerBase.cs" />
     <Compile Include="Language\IntelliSense.cs" />
