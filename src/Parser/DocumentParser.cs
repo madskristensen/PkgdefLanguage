@@ -7,7 +7,7 @@ namespace PkgdefLanguage
     public partial class Document
     {
         private static readonly Regex _regexProperty = new(@"^(?<name>.+)(\s)*(?<equals>=)\s*(?<value>.+)", RegexOptions.Compiled);
-        private static readonly Regex _regexRef = new(@"(?<open>\$)(?<value>[\w]+)(?<close>\$)", RegexOptions.Compiled);
+        private static readonly Regex _regexRef = new(@"\$[\w]+\$?", RegexOptions.Compiled);
 
         public void Parse()
         {
@@ -107,12 +107,7 @@ namespace PkgdefLanguage
         {
             foreach (Match match in _regexRef.Matches(token.Text))
             {
-                ParseItem open = ToParseItem(match, token.Span.Start, "open", ItemType.ReferenceBraces, false);
-                ParseItem value = ToParseItem(match, token.Span.Start, "value", ItemType.ReferenceName, false);
-                ParseItem close = ToParseItem(match, token.Span.Start, "close", ItemType.ReferenceBraces, false);
-
-                var reference = new Reference(open, value, close);
-
+                ParseItem reference = ToParseItem(match.Value, token.Span.Start + match.Index, ItemType.Reference, false);
                 token.References.Add(reference);
             }
         }

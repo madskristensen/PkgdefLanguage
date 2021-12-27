@@ -21,8 +21,7 @@ namespace PkgdefLanguage
             { ItemType.String, PredefinedClassificationTypeNames.String },
             { ItemType.Literal, PredefinedClassificationTypeNames.Literal },
             { ItemType.Comment, PredefinedClassificationTypeNames.Comment },
-            { ItemType.ReferenceBraces, PredefinedClassificationTypeNames.SymbolDefinition },
-            { ItemType.ReferenceName, PredefinedClassificationTypeNames.SymbolReference },
+            { ItemType.Reference, PredefinedClassificationTypeNames.SymbolReference },
             { ItemType.Operator, PredefinedClassificationTypeNames.Operator },
         };
     }

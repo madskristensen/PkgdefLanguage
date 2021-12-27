@@ -27,7 +27,7 @@ namespace PkgdefLanguage
 
         public Document Document { get; }
 
-        public List<Reference> References { get; } = new();
+        public List<ParseItem> References { get; } = new();
 
         public ICollection<Error> Errors => _errors;
 

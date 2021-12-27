@@ -84,5 +84,19 @@ namespace PkgdefLanguage.Test
 
             Assert.IsFalse(prop.IsValid);
         }
+
+        [TestMethod]
+        public async Task VariableSpanCorrect()
+        {
+            var lines = new[] { "[$rootkey$]" };
+            var doc = Document.FromLines(lines);
+            await doc.WaitForParsingCompleteAsync();
+            var entries = doc.Items.OfType<Entry>().ToList();
+
+            ParseItem reference = entries[0].RegistryKey.References.FirstOrDefault();
+            Assert.AreEqual("$rootkey$", reference.Text);
+            Assert.AreEqual(1, reference.Span.Start);
+            Assert.AreEqual(10, reference.Span.End);
+        }
     }
 }

@@ -93,7 +93,7 @@
     <Compile Include="BaseClasses\TokenErrorListBase.cs" />
     <Compile Include="Language\BasicLanguageFeatures.cs" />
     <Compile Include="BaseClasses\TokenClassificationBaseTagger.cs" />
-    <Compile Include="Language\CompletionSource.cs" />
+    <Compile Include="Language\AsyncCompletionSourceProvider.cs" />
     <Compile Include="BaseClasses\TokenErrorBaseTagger.cs" />
     <Compile Include="Language\LanguageFactory.cs" />
     <Compile Include="BaseClasses\TokenQuickInfoBase.cs" />
@@ -104,7 +104,6 @@
     <Compile Include="Parser\ItemType.cs" />
     <Compile Include="Parser\ParseItem.cs" />
     <Compile Include="Parser\Property.cs" />
-    <Compile Include="Parser\Reference.cs" />
     <Compile Include="Parser\Entry.cs" />
     <Compile Include="PkgdefPackage.cs" />
     <Compile Include="source.extension.cs">

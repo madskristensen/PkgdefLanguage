@@ -56,11 +56,9 @@ namespace PkgdefLanguage
                 {
                     AddTagToList(list, item);
 
-                    foreach (Reference variable in item.References)
+                    foreach (ParseItem variable in item.References)
                     {
-                        AddTagToList(list, variable.Open);
-                        AddTagToList(list, variable.Value);
-                        AddTagToList(list, variable.Close);
+                        AddTagToList(list, variable);
                     }
                 }
 
@@ -75,10 +73,14 @@ namespace PkgdefLanguage
         private void AddTagToList(Dictionary<ParseItem, ITagSpan<TokenTag>> list, ParseItem item)
         {
             var span = new SnapshotSpan(_buffer.CurrentSnapshot, item);
-            Func<SnapshotPoint, Task<object>> func = !item.IsValid ? GetTooltipAsync : null;
-            var tag = new TokenTag(item.Type, item is Entry, func, CreateErrorListItem(item).ToArray());
-            var tagSpan = new TagSpan<TokenTag>(span, tag);
-            list.Add(item, tagSpan);
+
+            var tag = new TokenTag(
+                tokenType: item.Type,
+                supportOutlining: item is Entry entry && entry.Properties.Any(),
+                getTooltipAsync: item.IsValid ? null : GetTooltipAsync,
+                errors: CreateErrorListItem(item).ToArray());
+
+            list.Add(item, new TagSpan<TokenTag>(span, tag));
         }
 
         private IEnumerable<ErrorListItem> CreateErrorListItem(ParseItem item)
@@ -104,7 +106,7 @@ namespace PkgdefLanguage
 
         private Task<object> GetTooltipAsync(SnapshotPoint triggerPoint)
         {
-            ParseItem item = _document.GetTokenFromPosition(triggerPoint.Position);
+            ParseItem item = _document.FindItemFromPosition(triggerPoint.Position);
 
             // Error messages
             if (item?.IsValid == false)

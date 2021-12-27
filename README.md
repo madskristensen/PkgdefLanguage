@@ -15,9 +15,9 @@ Syntax highligting makes it easy to parse the document. Here's what it looks lik
 ![Colorization](art/colorization.png)
 
 ## IntelliSense
-Full completion provided for variables.
+Full completion provided for variables and registry keys.
 
-![Intellisense](art/intellisense.png)
+![Intellisense](art/intellisense.gif)
 
 ## Validation
 There's validation for both syntax errors and unknown variables.

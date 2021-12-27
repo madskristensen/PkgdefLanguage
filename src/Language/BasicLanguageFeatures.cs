@@ -36,7 +36,7 @@ namespace PkgdefLanguage
     [Name(Constants.LanguageName)]
     internal sealed class CompletionCommitManager : CompletionCommitManagerBase
     {
-        public override IEnumerable<char> CommitChars => new char[] { ' ', '\'', '"', ',', '.', ';', ':' };
+        public override IEnumerable<char> CommitChars => new char[] { ' ', '\'', '"', ',', '.', ';', ':', '\\' };
     }
 
     [Export(typeof(IViewTaggerProvider))]

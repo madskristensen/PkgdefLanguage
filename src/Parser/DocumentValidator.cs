@@ -16,6 +16,7 @@ namespace PkgdefLanguage
             public static Error PL004 { get; } = new("PL004", "To set a registry key's default value, use '@' without quotation marks", __VSERRORCATEGORY.EC_WARNING);
             public static Error PL005 { get; } = new("PL005", "Value names must be enclosed in quotation marks.", __VSERRORCATEGORY.EC_ERROR);
             public static Error PL006 { get; } = new("PL006", "The variable \"{0}\" doens't exist.", __VSERRORCATEGORY.EC_WARNING);
+            public static Error PL007 { get; } = new("PL007", "Variables must begin and end with $ character.", __VSERRORCATEGORY.EC_ERROR);
         }
 
         private void AddError(ParseItem item, Error error)
@@ -79,12 +80,18 @@ namespace PkgdefLanguage
                     }
                 }
 
-                // Unknown references
-                foreach (Reference reference in item.References)
+                // References
+                foreach (ParseItem reference in item.References)
                 {
-                    if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(reference.Value.Text, StringComparison.OrdinalIgnoreCase)))
+                    var refTrim = reference.Text.Trim();
+
+                    if (!refTrim.EndsWith("$"))
                     {
-                        AddError(reference.Value, Errors.PL006.WithFormat(reference.Value.Text));
+                        AddError(reference, Errors.PL007);
+                    }
+                    else if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(refTrim.Trim('$'), StringComparison.OrdinalIgnoreCase)))
+                    {
+                        AddError(reference, Errors.PL006.WithFormat(refTrim));
                     }
                 }
             }

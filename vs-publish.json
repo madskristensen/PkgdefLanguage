@@ -10,8 +10,8 @@
       "targetPath": "art/colorization.png"
     },
     {
-      "pathOnDisk": "art/intellisense.png",
-      "targetPath": "art/intellisense.png"
+      "pathOnDisk": "art/intellisense.gif",
+      "targetPath": "art/intellisense.gif"
     },
     {
       "pathOnDisk": "art/outlining.png",

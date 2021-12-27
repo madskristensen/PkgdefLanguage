@@ -3,8 +3,7 @@
     public enum ItemType
     {
         Comment,
-        ReferenceBraces,
-        ReferenceName,
+        Reference,
         RegistryKey,
         String,
         Literal,
