@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace BaseClasses
 {
-    public abstract class TokenClassificationBaseTagger : ITaggerProvider
+    public abstract class TokenClassificationTaggerBase : ITaggerProvider
     {
         [Import] internal IClassificationTypeRegistryService _classificationRegistry = null;
         [Import] internal IBufferTagAggregatorFactoryService _bufferTagAggregator = null;

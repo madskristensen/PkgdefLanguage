@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace BaseClasses
 {
-    public abstract class TokenErrorBaseTagger : ITaggerProvider
+    public abstract class TokenErrorTaggerBase : ITaggerProvider
     {
         [Import] internal IBufferTagAggregatorFactoryService _bufferTagAggregator = null;
 

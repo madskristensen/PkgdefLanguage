@@ -22,7 +22,7 @@ namespace PkgdefLanguage
     [Export(typeof(IAsyncCompletionSourceProvider))]
     [ContentType(Constants.LanguageName)]
     [Name(Constants.LanguageName)]
-    public class AsyncCompletionSourceProvider : IAsyncCompletionSourceProvider
+    public class IntelliSense : IAsyncCompletionSourceProvider
     {
         public IAsyncCompletionSource GetOrCreate(ITextView textView) =>
             textView.Properties.GetOrCreateSingletonProperty(() => new AsyncCompletionSource());
