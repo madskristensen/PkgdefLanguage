@@ -63,5 +63,15 @@ namespace BaseClasses
                 _dataSource.AddErrors(errors);
             }
         }
+
+        public override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _dataSource.CleanAllErrors();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }
