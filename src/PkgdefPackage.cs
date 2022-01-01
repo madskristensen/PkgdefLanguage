@@ -14,7 +14,7 @@ namespace PkgdefLanguage
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
 
-    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, EnableLineNumbers = true, MatchBraces = true, MatchBracesAtCaret = true, EnableAsyncCompletion = true, EnableCommenting = true, ShowCompletion = true, ShowMatchingBrace = true)]
+    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, DefaultToInsertSpaces = true, EnableLineNumbers = true, MatchBraces = true, MatchBracesAtCaret = true, EnableAsyncCompletion = true, EnableCommenting = true, ShowCompletion = true, ShowMatchingBrace = true)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgDefExt)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgUndefExt)]
     [ProvideFileIcon(Constants.PkgDefExt, "KnownMonikers.RegistrationScript")]

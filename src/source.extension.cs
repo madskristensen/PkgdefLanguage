@@ -11,7 +11,7 @@ namespace PkgdefLanguage
         public const string Name = "Pkgdef Language";
         public const string Description = @"Basic language support for .pkgdef and .pkgundef files";
         public const string Language = "en-US";
-        public const string Version = "1.2";
+        public const string Version = "1.2.999";
         public const string Author = "Mads Kristensen";
         public const string Tags = "vsix, pkgdef, textmate";
     }

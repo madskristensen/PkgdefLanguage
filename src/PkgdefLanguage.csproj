@@ -69,7 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Community.VisualStudio.Toolkit.16" ExcludeAssets="runtime">
-      <Version>16.0.361</Version>
+      <Version>16.0.365</Version>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
@@ -79,23 +79,17 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseClasses\TokenTag.cs" />
     <Compile Include="Commands\FormatSelectionCommand.cs" />
     <Compile Include="Commands\FormatDocumentCommand.cs" />
-    <Compile Include="BaseClasses\TokenTaggerConsumerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\CommentCommand.cs" />
     <Compile Include="Commands\UncommentCommand.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Language\TokenTagger.cs" />
-    <Compile Include="Language\PredefinedVariables.cs" />
+    <Compile Include="Parser\PredefinedVariables.cs" />
     <Compile Include="Language\EditorFeatures.cs" />
-    <Compile Include="BaseClasses\TokenClassificationTaggerBase.cs" />
     <Compile Include="Language\IntelliSense.cs" />
-    <Compile Include="BaseClasses\TokenErrorTaggerBase.cs" />
     <Compile Include="Language\LanguageFactory.cs" />
-    <Compile Include="BaseClasses\TokenQuickInfoBase.cs" />
-    <Compile Include="BaseClasses\TokenOutliningTaggerBase.cs" />
     <Compile Include="Parser\Document.cs" />
     <Compile Include="Parser\DocumentParser.cs" />
     <Compile Include="Parser\DocumentValidator.cs" />

@@ -34,7 +34,7 @@ namespace PkgdefLanguage
             preferences.IndentStyle = IndentingStyle.Smart;
             preferences.ShowNavigationBar = false;
 
-            preferences.WordWrap = false;
+            preferences.WordWrap = true;
             preferences.WordWrapGlyphs = true;
 
             preferences.AutoListMembers = true;
