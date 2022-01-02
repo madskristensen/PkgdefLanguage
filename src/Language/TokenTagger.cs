@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Tagging;
+using Microsoft.VisualStudio.Threading;
 using Microsoft.VisualStudio.Utilities;
 
 namespace PkgdefLanguage
@@ -37,7 +38,12 @@ namespace PkgdefLanguage
             _document = buffer.GetDocument();
             _document.Processed += ReParse;
             _tagsCache = new Dictionary<ParseItem, ITagSpan<TokenTag>>();
-            ReParse();
+
+            ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            {
+                await TaskScheduler.Default;
+                ReParse();
+            }).FireAndForget();
         }
 
         public IEnumerable<ITagSpan<TokenTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -47,26 +53,31 @@ namespace PkgdefLanguage
 
         private void ReParse(object sender = null, EventArgs e = null)
         {
-            ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
+            // Make sure this is running on a background thread.
+            ThreadHelper.ThrowIfOnUIThread();
+
+            Dictionary<ParseItem, ITagSpan<TokenTag>> list = new();
+
+            foreach (ParseItem item in _document.Items)
             {
-                Dictionary<ParseItem, ITagSpan<TokenTag>> list = new();
-
-                foreach (ParseItem item in _document.Items)
+                if (_document.IsProcessing)
                 {
-                    AddTagToList(list, item);
-
-                    foreach (ParseItem variable in item.References)
-                    {
-                        AddTagToList(list, variable);
-                    }
+                    // Abort and wait for the next parse event to finish
+                    return;
                 }
 
-                _tagsCache = list;
+                AddTagToList(list, item);
 
-                SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
-                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+                foreach (ParseItem variable in item.References)
+                {
+                    AddTagToList(list, variable);
+                }
+            }
 
-            }, VsTaskRunContext.UIThreadIdlePriority);
+            _tagsCache = list;
+
+            SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
+            TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
         }
 
         private void AddTagToList(Dictionary<ParseItem, ITagSpan<TokenTag>> list, ParseItem item)

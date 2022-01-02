@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Threading;
 
 namespace PkgdefLanguage
 {
@@ -59,23 +61,32 @@ namespace PkgdefLanguage
             return doc;
         }
 
-        public Task ProcessAsync()
+        public async Task ProcessAsync()
         {
             IsProcessing = true;
+            var success = false;
 
-            return Task.Run(() =>
+            await TaskScheduler.Default;
+
+            try
             {
-                try
+                Parse();
+                ValidateDocument();
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                await ex.LogAsync();
+            }
+            finally
+            {
+                IsProcessing = false;
+
+                if (success)
                 {
-                    Parse();
-                    ValidateDocument();
-                }
-                finally
-                {
-                    IsProcessing = false;
                     Processed?.Invoke(this, EventArgs.Empty);
                 }
-            });
+            }
         }
 
         public ParseItem FindItemFromPosition(int position)
