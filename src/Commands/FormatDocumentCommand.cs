@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.Commanding;
 using Microsoft.VisualStudio.Text;
@@ -25,8 +27,30 @@ namespace PkgdefLanguage
             {
                 if (item is Entry entry)
                 {
+                    var insertLineBefore = true;
+
+                    if (!entry.Properties.Any() && NextEntry(entry) is Entry next)
+                    {
+                        var currentKey = entry.RegistryKey.Text.Trim().TrimEnd(']');
+                        var nextKey = next.RegistryKey.Text.Trim().TrimEnd(']');
+
+                        if (nextKey.IndexOf(currentKey, StringComparison.OrdinalIgnoreCase) > -1)
+                        {
+                            insertLineBefore = false;
+                        }
+                    }
+
                     sb.AppendLine();
-                    sb.AppendLine(entry.GetFormattedText());
+
+                    if (insertLineBefore)
+                    {
+                        sb.AppendLine(entry.GetFormattedText());
+                    }
+                    else
+                    {
+                        sb.Append(entry.GetFormattedText());
+                    }
+
                 }
                 else if (item.Type == ItemType.Comment)
                 {
@@ -38,6 +62,13 @@ namespace PkgdefLanguage
             args.SubjectBuffer.Replace(wholeDocSpan, sb.ToString().Trim());
 
             return true;
+        }
+
+        private Entry NextEntry(Entry current)
+        {
+            return current.Document.Items
+                .OfType<Entry>()
+                .FirstOrDefault(e => e.Span.Start >= current.Span.End);
         }
 
         public CommandState GetCommandState(FormatDocumentCommandArgs args)

@@ -20,7 +20,7 @@ Full completion provided for variables and registry keys.
 ![Intellisense](art/intellisense.gif)
 
 ## Validation
-There's validation for both syntax errors and unknown variables.
+There's validation for both syntax errors, unknown variables, and more to help you avoid mistakes.
 
 ![Validation](art/validation.png)
 

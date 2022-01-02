@@ -81,20 +81,22 @@ namespace PkgdefLanguage
 
     public class Error
     {
-        public Error(string errorCode, string message, __VSERRORCATEGORY severity)
+        public Error(string errorCode, string message, string category, __VSERRORCATEGORY severity)
         {
             ErrorCode = errorCode;
             Message = message;
+            Category = category;
             Severity = severity;
         }
 
         public string ErrorCode { get; }
         public string Message { get; }
+        public string Category { get; }
         public __VSERRORCATEGORY Severity { get; }
 
         public Error WithFormat(params string[] replacements)
         {
-            return new Error(ErrorCode, string.Format(Message, replacements), Severity);
+            return new Error(ErrorCode, string.Format(Message, replacements), Category, Severity);
         }
     }
 }

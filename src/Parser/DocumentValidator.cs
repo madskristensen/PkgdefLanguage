@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.Shell.Interop;
+using type = Microsoft.VisualStudio.Text.Adornments.PredefinedErrorTypeNames;
 
 namespace PkgdefLanguage
 {
@@ -10,13 +11,14 @@ namespace PkgdefLanguage
 
         private class Errors
         {
-            public static Error PL001 { get; } = new("PL001", "Unknown token at this location", __VSERRORCATEGORY.EC_ERROR);
-            public static Error PL002 { get; } = new("PL002", "Unclosed registry key entry. Add the missing ] character", __VSERRORCATEGORY.EC_ERROR);
-            public static Error PL003 { get; } = new("PL003", "Use the backslash character as delimiter instead of forward slash.", __VSERRORCATEGORY.EC_ERROR);
-            public static Error PL004 { get; } = new("PL004", "To set a registry key's default value, use '@' without quotation marks", __VSERRORCATEGORY.EC_WARNING);
-            public static Error PL005 { get; } = new("PL005", "Value names must be enclosed in quotation marks.", __VSERRORCATEGORY.EC_ERROR);
-            public static Error PL006 { get; } = new("PL006", "The variable \"{0}\" doens't exist.", __VSERRORCATEGORY.EC_WARNING);
-            public static Error PL007 { get; } = new("PL007", "Variables must begin and end with $ character.", __VSERRORCATEGORY.EC_ERROR);
+            public static Error PL001 { get; } = new("PL001", "Unknown token at this location", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
+            public static Error PL002 { get; } = new("PL002", "Unclosed registry key entry. Add the missing ] character", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
+            public static Error PL003 { get; } = new("PL003", "Use the backslash character as delimiter instead of forward slash.", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
+            public static Error PL004 { get; } = new("PL004", "To set a registry key's default value, use '@' without quotation marks", type.Warning, __VSERRORCATEGORY.EC_WARNING);
+            public static Error PL005 { get; } = new("PL005", "Value names must be enclosed in quotation marks.", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
+            public static Error PL006 { get; } = new("PL006", "The variable \"{0}\" doens't exist.", type.Warning, __VSERRORCATEGORY.EC_WARNING);
+            public static Error PL007 { get; } = new("PL007", "Variables must begin and end with $ character.", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
+            public static Error PL008 { get; } = new("PL008", "This registry key \"{0}\" was already defined earlier in the document", type.Suggestion, __VSERRORCATEGORY.EC_MESSAGE);
         }
 
         private void AddError(ParseItem item, Error error)
@@ -49,6 +51,12 @@ namespace PkgdefLanguage
                     else if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
                     {
                         AddError(item, Errors.PL003);
+                    }
+
+                    var index = Items.IndexOf(item);
+                    if (Items.Take(index).Any(i => i.Type == ItemType.RegistryKey && item.Text == i.Text))
+                    {
+                        AddError(item, Errors.PL008.WithFormat(trimmedText));
                     }
                 }
 

@@ -104,7 +104,7 @@ namespace PkgdefLanguage
                     ProjectName = _document.ProjectName ?? "",
                     FileName = _document.FileName,
                     Message = error.Message,
-                    ErrorCategory = PredefinedErrorTypeNames.SyntaxError,
+                    ErrorCategory = error.Category,
                     Severity = error.Severity,
                     Line = line.LineNumber,
                     Column = item.Span.Start - line.Start.Position,
