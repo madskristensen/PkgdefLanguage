@@ -95,7 +95,7 @@ namespace PkgdefLanguage
 
         public CompletionStartData InitializeCompletion(CompletionTrigger trigger, SnapshotPoint triggerLocation, CancellationToken token)
         {
-            if (trigger.Character == '\n' || trigger.Reason == CompletionTriggerReason.Deletion)
+            if (trigger.Character == '\n' || trigger.Character == ']' || trigger.Reason == CompletionTriggerReason.Deletion)
             {
                 return CompletionStartData.DoesNotParticipateInCompletion;
             }
@@ -111,12 +111,19 @@ namespace PkgdefLanguage
             else if (item?.Type == ItemType.RegistryKey && item.Text.IndexOf("$rootkey$", StringComparison.OrdinalIgnoreCase) > -1)
             {
                 var column = triggerLocation.Position - item.Span.Start;
+
+                if (column < 1)
+                {
+                    return CompletionStartData.DoesNotParticipateInCompletion; ;
+                }
+
                 var start = item.Text.LastIndexOf('\\', column - 1) + 1;
                 var end = item.Text.IndexOf('\\', column);
                 var close = item.Text.IndexOf(']', column);
                 var textEnd = item.Text.IndexOf(']', column);
                 end = end >= start ? end : close;
                 end = end >= start ? end : textEnd;
+                end = end >= start ? end : item.Text.TrimEnd().Length;
 
                 if (end >= start)
                 {

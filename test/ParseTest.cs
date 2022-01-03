@@ -29,6 +29,23 @@ namespace PkgdefLanguage.Test
         }
 
         [TestMethod]
+        public async Task EqualsInPropertyValue()
+        {
+            var lines = new[] { "[test]\r\n",
+                                 "@=\"test=1234\""
+            };
+
+            var doc = Document.FromLines(lines);
+            await doc.WaitForParsingCompleteAsync();
+            var entries = doc.Items.OfType<Entry>().ToList();
+
+            Assert.AreEqual(1, entries.Count);
+
+            Entry entry = entries.First();
+            Assert.AreEqual("\"test=1234\"", entry.Properties.First().Value.Text);
+        }
+
+        [TestMethod]
         public async Task MultipleEntries()
         {
             var lines = new[] { "[test]\r\n",

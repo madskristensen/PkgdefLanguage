@@ -38,6 +38,7 @@ namespace PkgdefLanguage
             preferences.WordWrapGlyphs = true;
 
             preferences.AutoListMembers = true;
+            preferences.HideAdvancedMembers = false;
             preferences.EnableQuickInfo = true;
             preferences.ParameterInformation = true;
         }
