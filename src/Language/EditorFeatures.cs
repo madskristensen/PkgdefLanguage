@@ -22,6 +22,7 @@ namespace PkgdefLanguage
             { ItemType.Comment, PredefinedClassificationTypeNames.Comment },
             { ItemType.Reference, PredefinedClassificationTypeNames.SymbolReference },
             { ItemType.Operator, PredefinedClassificationTypeNames.Operator },
+            { ItemType.Preprocessor, PredefinedClassificationTypeNames.PreprocessorKeyword },
         };
     }
 

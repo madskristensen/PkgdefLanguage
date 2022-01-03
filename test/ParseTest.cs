@@ -76,7 +76,7 @@ namespace PkgdefLanguage.Test
         {
             var lines = new[] { "; comment\r\n",
                                 "\r\n",
-                                "; comment"
+                                ";comment"
             };
 
             var doc = Document.FromLines(lines);

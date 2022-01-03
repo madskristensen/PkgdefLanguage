@@ -7,9 +7,11 @@ namespace PkgdefLanguage
         public static Dictionary<string, string> Variables = new()
         {
             { "AppDataLocalFolder", "The subfolder under %LOCALAPPDATA% for this application." },
+            { "ApplicationExtensionsFolder", "n/a" },
             { "AppName", "The qualified name of the application that is passed to the AppEnv.dll entry points. The qualified name consists of the application name, an underscore, and the class identifier (CLSID of the application automation object, which is also recorded as the value of the ThisVersionDTECLSID setting in the project .pkgdef file." },
             { "BaseInstallDir", "The full path of the location where Visual Studio was installed." },
             { "CommonFiles", "The value of the %CommonProgramFiles% environment variable." },
+            { "Initialization", "n/a" },
             { "MyDocuments", "The full path of the My Documents folder of the current user." },
             { "PackageFolder", "The full path of the directory that contains the package assembly files for the application." },
             { "ProgramFiles", "The value of the %ProgramFiles% environment variable." },

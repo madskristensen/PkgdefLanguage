@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace PkgdefLanguage
 {
     public partial class Document
     {
-        private static readonly Regex _regexProperty = new(@"^(?<name>.+)(\s)*(?<equals>=)\s*(?<value>(dword:[\d].+|"".+))", RegexOptions.Compiled);
+        private static readonly Regex _regexProperty = new(@"^(?<name>""[^""]+""|@)(\s)*(?<equals>=)\s*(?<value>((dword:|hex).+|"".+))", RegexOptions.Compiled);
         private static readonly Regex _regexRef = new(@"\$[\w]+\$?", RegexOptions.Compiled);
 
         public void Parse()
@@ -29,13 +30,18 @@ namespace PkgdefLanguage
 
         private IEnumerable<ParseItem> ParseLine(int start, string line, List<ParseItem> tokens)
         {
-            var trimmedLine = line.TrimEnd();
+            var trimmedLine = line.Trim();
             List<ParseItem> items = new();
 
             // Comment
             if (trimmedLine.StartsWith(Constants.CommentChars[0]) || trimmedLine.StartsWith(Constants.CommentChars[1]))
             {
                 items.Add(ToParseItem(line, start, ItemType.Comment, false));
+            }
+            // Preprocessor
+            else if (trimmedLine.StartsWith("#include"))
+            {
+                items.Add(ToParseItem(line, start, ItemType.Preprocessor, false));
             }
             // Registry key
             else if (trimmedLine.StartsWith("[", StringComparison.Ordinal))
@@ -66,7 +72,10 @@ namespace PkgdefLanguage
             // Unknown
             else if (trimmedLine.Length > 0)
             {
-                items.Add(new ParseItem(start, line, this, ItemType.Unknown));
+                // Check for line splits which is a line ending with a backslash
+                var lineSplit = tokens.LastOrDefault()?.Text.TrimEnd().EndsWith("\\") == true;
+                ItemType type = lineSplit ? tokens.Last().Type : ItemType.Unknown;
+                items.Add(new ParseItem(start, line, this, type));
             }
 
             return items;

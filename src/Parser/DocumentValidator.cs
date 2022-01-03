@@ -48,10 +48,10 @@ namespace PkgdefLanguage
                     {
                         AddError(item, Errors.PL002);
                     }
-                    else if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
-                    {
-                        AddError(item, Errors.PL003);
-                    }
+                    //else if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
+                    //{
+                    //    AddError(item, Errors.PL003);
+                    //}
 
                     var index = Items.IndexOf(item);
                     if (Items.Take(index).Any(i => i.Type == ItemType.RegistryKey && item.Text == i.Text))
@@ -93,14 +93,20 @@ namespace PkgdefLanguage
                 {
                     var refTrim = reference.Text.Trim();
 
-                    if (!refTrim.EndsWith("$"))
+                    //if (!refTrim.EndsWith("$"))
+                    //{
+                    //    AddError(reference, Errors.PL007);
+                    //}
+                    //else
+                    //{
+                    if (refTrim.EndsWith("$"))
                     {
-                        AddError(reference, Errors.PL007);
+                        if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(refTrim.Trim('$'), StringComparison.OrdinalIgnoreCase)))
+                        {
+                            AddError(reference, Errors.PL006.WithFormat(refTrim));
+                        }
                     }
-                    else if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(refTrim.Trim('$'), StringComparison.OrdinalIgnoreCase)))
-                    {
-                        AddError(reference, Errors.PL006.WithFormat(refTrim));
-                    }
+                    //}
                 }
             }
         }
