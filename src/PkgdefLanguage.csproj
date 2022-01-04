@@ -7,6 +7,7 @@
     <LangVersion>10</LangVersion>
     <UseCodebase>true</UseCodebase>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+    <NoWarn>MSB3277</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
   </PropertyGroup>
