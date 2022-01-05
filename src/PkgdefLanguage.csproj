@@ -8,6 +8,7 @@
     <UseCodebase>true</UseCodebase>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <NoWarn>MSB3277</NoWarn>
+    <DisableWarning>MSB3277</DisableWarning>
   </PropertyGroup>
   <PropertyGroup>
   </PropertyGroup>

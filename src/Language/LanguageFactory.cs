@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Package;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace PkgdefLanguage
@@ -9,18 +8,11 @@ namespace PkgdefLanguage
     internal sealed class LanguageFactory : LanguageBase
     {
         public LanguageFactory(object site) : base(site)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-        }
+        { }
 
         public override string Name => Constants.LanguageName;
 
         public override string[] FileExtensions { get; } = new[] { Constants.PkgDefExt, Constants.PkgUndefExt };
-
-        public override TypeAndMemberDropdownBars CreateDropDownHelper(IVsTextView forView)
-        {
-            return base.CreateDropDownHelper(forView);
-        }
 
         public override void SetDefaultPreferences(LanguagePreferences preferences)
         {
