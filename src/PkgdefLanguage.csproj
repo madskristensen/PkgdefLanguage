@@ -87,11 +87,11 @@
     <Compile Include="Commands\CommentCommand.cs" />
     <Compile Include="Commands\UncommentCommand.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Language\TokenTagger.cs" />
+    <Compile Include="Editor\TokenTagger.cs" />
     <Compile Include="Parser\PredefinedVariables.cs" />
-    <Compile Include="Language\EditorFeatures.cs" />
-    <Compile Include="Language\IntelliSense.cs" />
-    <Compile Include="Language\LanguageFactory.cs" />
+    <Compile Include="Editor\EditorFeatures.cs" />
+    <Compile Include="Editor\IntelliSense.cs" />
+    <Compile Include="Editor\LanguageFactory.cs" />
     <Compile Include="Parser\Document.cs" />
     <Compile Include="Parser\DocumentParser.cs" />
     <Compile Include="Parser\DocumentValidator.cs" />
