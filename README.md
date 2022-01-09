@@ -14,14 +14,14 @@ or get the [CI build][vsixgallery].
 This extension provides basic language support for .pkgdef and .pkgundef files in Visual Studio.
 
 ## Syntax highlighting
-Syntax highligting makes it easy to parse the document. Here's what it looks like:
+Syntax highlighting makes it easy to parse the document. Here's what it looks like:
 
 ![Colorization](art/colorization.png)
 
 ## IntelliSense
 Full completion provided for variables and registry keys.
 
-![Intellisense](art/intellisense.gif)
+![IntelliSense](art/intellisense.gif)
 
 ## Validation
 There's validation for both syntax errors, unknown variables, and more to help you avoid mistakes.

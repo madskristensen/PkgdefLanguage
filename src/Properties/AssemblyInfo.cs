@@ -12,7 +12,6 @@ using PkgdefLanguage;
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
-[assembly: Guid("18a186db-6299-426e-9a9e-dbefe4e65465")]
 
 [assembly: AssemblyVersion(Vsix.Version)]
 [assembly: AssemblyFileVersion(Vsix.Version)]

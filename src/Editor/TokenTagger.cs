@@ -5,11 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Core.Imaging;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Tagging;
-using Microsoft.VisualStudio.Threading;
 using Microsoft.VisualStudio.Utilities;
 
 namespace PkgdefLanguage
@@ -24,46 +22,33 @@ namespace PkgdefLanguage
             buffer.Properties.GetOrCreateSingletonProperty(() => new TokenTagger(buffer)) as ITagger<T>;
     }
 
-    internal class TokenTagger : ITagger<TokenTag>, IDisposable
+    internal class TokenTagger : TokenTaggerBase, IDisposable
     {
         private readonly Document _document;
-        private readonly ITextBuffer _buffer;
-        private Dictionary<ParseItem, ITagSpan<TokenTag>> _tagsCache;
         private static readonly ImageId _errorIcon = KnownMonikers.StatusWarningNoColor.ToImageId();
         private bool _isDisposed;
 
-        internal TokenTagger(ITextBuffer buffer)
+        internal TokenTagger(ITextBuffer buffer) : base(buffer)
         {
-            _buffer = buffer;
             _document = buffer.GetDocument();
-            _document.Processed += ReParse;
-            _tagsCache = new Dictionary<ParseItem, ITagSpan<TokenTag>>();
-
-            ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-            {
-                await TaskScheduler.Default;
-                ReParse();
-            }).FireAndForget();
+            _document.Processed += DocumentProcessed;
         }
 
-        public IEnumerable<ITagSpan<TokenTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        private void DocumentProcessed(Document document)
         {
-            return _tagsCache.Values;
+            _ = TokenizeAsync();
         }
 
-        private void ReParse(object sender = null, EventArgs e = null)
+        public override Task TokenizeAsync()
         {
-            // Make sure this is running on a background thread.
-            ThreadHelper.ThrowIfOnUIThread();
-
-            Dictionary<ParseItem, ITagSpan<TokenTag>> list = new();
+            List<ITagSpan<TokenTag>> list = new();
 
             foreach (ParseItem item in _document.Items)
             {
                 if (_document.IsProcessing)
                 {
                     // Abort and wait for the next parse event to finish
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 AddTagToList(list, item);
@@ -74,28 +59,25 @@ namespace PkgdefLanguage
                 }
             }
 
-            _tagsCache = list;
-
-            SnapshotSpan span = new(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
-            TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+            OnTagsUpdated(list);
+            return Task.CompletedTask;
         }
 
-        private void AddTagToList(Dictionary<ParseItem, ITagSpan<TokenTag>> list, ParseItem item)
+        private void AddTagToList(List<ITagSpan<TokenTag>> list, ParseItem item)
         {
-            var span = new SnapshotSpan(_buffer.CurrentSnapshot, item);
+            var hasTooltip = !item.IsValid;
+            var supportsOutlining = item is Entry entry && entry.Properties.Any();
+            IEnumerable<ErrorListItem> errors = CreateErrorListItems(item);
 
-            var tag = new TokenTag(
-                tokenType: item.Type,
-                supportOutlining: item is Entry entry && entry.Properties.Any(),
-                getTooltipAsync: item.IsValid ? null : GetTooltipAsync,
-                errors: CreateErrorListItem(item).ToArray());
+            TokenTag tag = CreateToken(item.Type, hasTooltip, supportsOutlining, errors);
 
-            list.Add(item, new TagSpan<TokenTag>(span, tag));
+            SnapshotSpan span = new(Buffer.CurrentSnapshot, item);
+            list.Add(new TagSpan<TokenTag>(span, tag));
         }
 
-        private IEnumerable<ErrorListItem> CreateErrorListItem(ParseItem item)
+        private IEnumerable<ErrorListItem> CreateErrorListItems(ParseItem item)
         {
-            ITextSnapshotLine line = _buffer.CurrentSnapshot.GetLineFromPosition(item.Span.Start);
+            ITextSnapshotLine line = Buffer.CurrentSnapshot.GetLineFromPosition(item.Span.Start);
 
             foreach (Error error in item.Errors)
             {
@@ -114,14 +96,14 @@ namespace PkgdefLanguage
             }
         }
 
-        private Task<object> GetTooltipAsync(SnapshotPoint triggerPoint)
+        public override Task<object> GetTooltipAsync(SnapshotPoint triggerPoint)
         {
             ParseItem item = _document.FindItemFromPosition(triggerPoint.Position);
 
             // Error messages
             if (item?.IsValid == false)
             {
-                var elm = new ContainerElement(
+                ContainerElement elm = new(
                     ContainerElementStyle.Wrapped,
                     new ImageElement(_errorIcon),
                     string.Join(Environment.NewLine, item.Errors.Select(e => e.Message)));
@@ -136,13 +118,11 @@ namespace PkgdefLanguage
         {
             if (!_isDisposed)
             {
-                _document.Processed -= ReParse;
+                _document.Processed -= DocumentProcessed;
                 _document.Dispose();
             }
 
             _isDisposed = true;
         }
-
-        public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
     }
 }

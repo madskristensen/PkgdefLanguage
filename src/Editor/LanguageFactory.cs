@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -7,6 +8,9 @@ namespace PkgdefLanguage
     [Guid(PackageGuids.EditorFactoryString)]
     internal sealed class LanguageFactory : LanguageBase
     {
+        private DropdownBars _dropdownBars;
+        private bool _disposed;
+
         public LanguageFactory(object site) : base(site)
         { }
 
@@ -29,7 +33,7 @@ namespace PkgdefLanguage
             preferences.InsertTabs = false;
             preferences.IndentSize = 2;
             preferences.IndentStyle = IndentingStyle.Smart;
-            preferences.ShowNavigationBar = false;
+            preferences.ShowNavigationBar = true;
 
             preferences.WordWrap = true;
             preferences.WordWrapGlyphs = true;
@@ -38,6 +42,28 @@ namespace PkgdefLanguage
             preferences.HideAdvancedMembers = false;
             preferences.EnableQuickInfo = true;
             preferences.ParameterInformation = true;
+        }
+
+        public override TypeAndMemberDropdownBars CreateDropDownHelper(IVsTextView textView)
+        {
+            _dropdownBars?.Dispose();
+            _dropdownBars = new DropdownBars(textView, this);
+
+            return _dropdownBars;
+        }
+
+        public override void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            _dropdownBars?.Dispose();
+            _dropdownBars = null;
+
+            base.Dispose();
         }
     }
 }

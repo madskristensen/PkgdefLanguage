@@ -84,7 +84,7 @@ namespace PkgdefLanguage
 
                 if (success)
                 {
-                    Processed?.Invoke(this, EventArgs.Empty);
+                    Processed?.Invoke(this);
                 }
             }
         }
@@ -111,7 +111,7 @@ namespace PkgdefLanguage
             _isDisposed = true;
         }
 
-        public event EventHandler Processed;
+        public event Action<Document> Processed;
     }
 
     public static class DocumentExtensions

@@ -16,7 +16,7 @@ namespace PkgdefLanguage
             public static Error PL003 { get; } = new("PL003", "Use the backslash character as delimiter instead of forward slash.", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
             public static Error PL004 { get; } = new("PL004", "To set a registry key's default value, use '@' without quotation marks", type.Warning, __VSERRORCATEGORY.EC_WARNING);
             public static Error PL005 { get; } = new("PL005", "Value names must be enclosed in quotation marks.", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
-            public static Error PL006 { get; } = new("PL006", "The variable \"{0}\" doens't exist.", type.Warning, __VSERRORCATEGORY.EC_WARNING);
+            public static Error PL006 { get; } = new("PL006", "The variable \"{0}\" doesn't exist.", type.Warning, __VSERRORCATEGORY.EC_WARNING);
             public static Error PL007 { get; } = new("PL007", "Variables must begin and end with $ character.", type.SyntaxError, __VSERRORCATEGORY.EC_ERROR);
             public static Error PL008 { get; } = new("PL008", "This registry key \"{0}\" was already defined earlier in the document", type.Suggestion, __VSERRORCATEGORY.EC_MESSAGE);
         }
