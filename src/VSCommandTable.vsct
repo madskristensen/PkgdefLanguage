@@ -10,8 +10,13 @@
 
   </Commands>
 
+  <UsedCommands>
+    <UsedCommand guid="guidVSStd97" id="ECMD_FORMATDOCUMENT" />
+    <UsedCommand guid="guidVSStd97" id="ECMD_FORMATSELECTION" />
+  </UsedCommands>
+
   <Symbols>
-    <GuidSymbol name="EditorFactory" value="{57522df2-e926-4908-8c62-d57afece26e5}" />    
-    <GuidSymbol name="PkgdefLanguage" value="{4ecd0189-a643-49a1-9f2a-6f32e299dd7d}" />
+    <GuidSymbol name="EditorFactory" value="{57522df2-e926-4908-8c62-d57afece26e4}" />    
+    <GuidSymbol name="PkgdefLanguage" value="{4ecd0189-a643-49a1-9f2a-6f32e299dd7c}" />
   </Symbols>
 </CommandTable>

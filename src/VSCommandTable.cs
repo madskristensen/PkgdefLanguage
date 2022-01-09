@@ -12,10 +12,10 @@ namespace PkgdefLanguage
     /// </summary>
     internal sealed partial class PackageGuids
     {
-        public const string EditorFactoryString = "57522df2-e926-4908-8c62-d57afece26e5";
+        public const string EditorFactoryString = "57522df2-e926-4908-8c62-d57afece26e4";
         public static Guid EditorFactory = new Guid(EditorFactoryString);
 
-        public const string PkgdefLanguageString = "4ecd0189-a643-49a1-9f2a-6f32e299dd7d";
+        public const string PkgdefLanguageString = "4ecd0189-a643-49a1-9f2a-6f32e299dd7c";
         public static Guid PkgdefLanguage = new Guid(PkgdefLanguageString);
     }
     /// <summary>

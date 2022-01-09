@@ -15,24 +15,25 @@ namespace PkgdefLanguage
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
 
-    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, DefaultToInsertSpaces = true, EnableLineNumbers = true, EnableAsyncCompletion = true, EnableCommenting = true, ShowCompletion = true, ShowDropDownOptions = true)]
+    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, EnableLineNumbers = true, EnableAsyncCompletion = true, ShowCompletion = true, EnableFormatSelection = true, ShowDropDownOptions = true)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgDefExt)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgUndefExt)]
-    [ProvideEditorExtension(typeof(LanguageFactory), Constants.PkgDefExt, 0x32)]
-    [ProvideEditorExtension(typeof(LanguageFactory), Constants.PkgUndefExt, 0x32)]
-    [ProvideEditorFactory(typeof(LanguageFactory), 0, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
+
+    [ProvideEditorFactory(typeof(LanguageFactory), 738, CommonPhysicalViewAttributes = (int)__VSPHYSICALVIEWATTRIBUTES.PVA_SupportsPreview, TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
+    [ProvideEditorExtension(typeof(LanguageFactory), Constants.PkgDefExt, 65535, NameResourceID = 738)]
+    [ProvideEditorExtension(typeof(LanguageFactory), Constants.PkgUndefExt, 65535, NameResourceID = 738)]
     [ProvideEditorLogicalView(typeof(LanguageFactory), VSConstants.LOGVIEWID.TextView_string, IsTrusted = true)]
-    [ProvideEditorLogicalView(typeof(LanguageFactory), VSConstants.LOGVIEWID.Code_string, IsTrusted = true)]
+
     [ProvideFileIcon(Constants.PkgDefExt, "KnownMonikers.RegistrationScript")]
     [ProvideFileIcon(Constants.PkgUndefExt, "KnownMonikers.RegistrationScript")]
     public sealed class PkgdefPackage : ToolkitPackage
     {
-        protected override Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
             var language = new LanguageFactory(this);
             RegisterEditorFactory(language);
             ((IServiceContainer)this).AddService(typeof(LanguageFactory), language, true);
-            return Task.CompletedTask;
         }
     }
 }

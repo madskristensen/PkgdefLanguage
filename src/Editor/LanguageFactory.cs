@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace PkgdefLanguage
 {
+    [ComVisible(true)]
     [Guid(PackageGuids.EditorFactoryString)]
     internal sealed class LanguageFactory : LanguageBase
     {
@@ -34,6 +35,7 @@ namespace PkgdefLanguage
             preferences.IndentSize = 2;
             preferences.IndentStyle = IndentingStyle.Smart;
             preferences.ShowNavigationBar = true;
+            preferences.EnableFormatSelection = true;
 
             preferences.WordWrap = true;
             preferences.WordWrapGlyphs = true;
