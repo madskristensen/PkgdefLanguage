@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -10,7 +9,6 @@ namespace PkgdefLanguage
     internal sealed class LanguageFactory : LanguageBase
     {
         private DropdownBars _dropdownBars;
-        private bool _disposed;
 
         public LanguageFactory(object site) : base(site)
         { }
@@ -18,11 +16,6 @@ namespace PkgdefLanguage
         public override string Name => Constants.LanguageName;
 
         public override string[] FileExtensions { get; } = new[] { Constants.PkgDefExt, Constants.PkgUndefExt };
-
-        public override ViewFilter CreateViewFilter(CodeWindowManager mgr, IVsTextView newView)
-        {
-            return base.CreateViewFilter(mgr, newView);
-        }
 
         public override void SetDefaultPreferences(LanguagePreferences preferences)
         {
@@ -61,15 +54,8 @@ namespace PkgdefLanguage
 
         public override void Dispose()
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            _dropdownBars?.Dispose();
+          _dropdownBars?.Dispose();
             _dropdownBars = null;
-
             base.Dispose();
         }
     }
