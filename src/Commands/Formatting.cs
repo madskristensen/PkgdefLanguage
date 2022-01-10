@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text;
 
 namespace PkgdefLanguage
 {
-    public class FormatDocumentCommand
+    public class Formatting
     {
         public static async Task InitializeAsync()
         {

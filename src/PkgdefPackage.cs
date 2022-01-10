@@ -15,7 +15,7 @@ namespace PkgdefLanguage
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
 
-    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, EnableLineNumbers = true, EnableAsyncCompletion = true, ShowCompletion = true, EnableFormatSelection = false, ShowDropDownOptions = true)]
+    [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, EnableLineNumbers = true, EnableAsyncCompletion = true, ShowCompletion = true, EnableFormatSelection = false, ShowDropDownOptions = true, EnableCommenting = true)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgDefExt)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgUndefExt)]
 
@@ -36,7 +36,8 @@ namespace PkgdefLanguage
             RegisterEditorFactory(language);
             ((IServiceContainer)this).AddService(typeof(LanguageFactory), language, true);
 
-            await FormatDocumentCommand.InitializeAsync();
+            await Formatting.InitializeAsync();
+            await Commenting2.InitializeAsync();
         }
     }
 }

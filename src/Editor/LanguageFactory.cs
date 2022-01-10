@@ -19,13 +19,18 @@ namespace PkgdefLanguage
 
         public override string[] FileExtensions { get; } = new[] { Constants.PkgDefExt, Constants.PkgUndefExt };
 
+        public override ViewFilter CreateViewFilter(CodeWindowManager mgr, IVsTextView newView)
+        {
+            return base.CreateViewFilter(mgr, newView);
+        }
+
         public override void SetDefaultPreferences(LanguagePreferences preferences)
         {
             preferences.EnableCodeSense = false;
             preferences.EnableMatchBraces = true;
             preferences.EnableMatchBracesAtCaret = true;
             preferences.EnableShowMatchingBrace = true;
-            preferences.EnableCommenting = false;
+            preferences.EnableCommenting = true;
             preferences.HighlightMatchingBraceFlags = _HighlightMatchingBraceFlags.HMB_USERECTANGLEBRACES;
             preferences.LineNumbers = true;
             preferences.MaxErrorMessages = 100;
