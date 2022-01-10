@@ -1,26 +1,36 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.Commanding;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Editor.Commanding.Commands;
-using Microsoft.VisualStudio.Utilities;
 
 namespace PkgdefLanguage
 {
-    [Export(typeof(ICommandHandler))]
-    [Name(nameof(FormatDocumentCommand))]
-    [ContentType(Constants.LanguageName)]
-    [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
-    public class FormatDocumentCommand : ICommandHandler<FormatDocumentCommandArgs>
+    public class FormatDocumentCommand
     {
-        public string DisplayName => nameof(CommentCommand);
-
-        public bool ExecuteCommand(FormatDocumentCommandArgs args, CommandExecutionContext executionContext)
+        public static async Task InitializeAsync()
         {
-            Document doc = args.SubjectBuffer.GetDocument();
+            // We need to manually intercept the FormatDocument command, because language services swallow formatting commands.
+            await VS.Commands.InterceptAsync(Microsoft.VisualStudio.VSConstants.VSStd2KCmdID.FORMATDOCUMENT, () =>
+            {
+                return ThreadHelper.JoinableTaskFactory.Run(async () =>
+                {
+                    DocumentView doc = await VS.Documents.GetActiveDocumentViewAsync();
+
+                    if (doc?.TextBuffer != null && doc.TextBuffer.ContentType.IsOfType(Constants.LanguageName))
+                    {
+                        Format(doc.TextBuffer);
+                        return CommandProgression.Stop;
+                    }
+
+                    return CommandProgression.Continue;
+                });
+            });
+        }
+
+        private static void Format(ITextBuffer buffer)
+        {
+            Document doc = buffer.GetDocument();
             var sb = new StringBuilder();
 
             foreach (ParseItem item in doc.Items)
@@ -58,22 +68,15 @@ namespace PkgdefLanguage
                 }
             }
 
-            var wholeDocSpan = new Span(0, args.SubjectBuffer.CurrentSnapshot.Length);
-            args.SubjectBuffer.Replace(wholeDocSpan, sb.ToString().Trim());
-
-            return true;
+            var wholeDocSpan = new Span(0, buffer.CurrentSnapshot.Length);
+            buffer.Replace(wholeDocSpan, sb.ToString().Trim());
         }
 
-        private Entry NextEntry(Entry current)
+        private static Entry NextEntry(Entry current)
         {
             return current.Document.Items
                 .OfType<Entry>()
                 .FirstOrDefault(e => e.Span.Start >= current.Span.End);
-        }
-
-        public CommandState GetCommandState(FormatDocumentCommandArgs args)
-        {
-            return CommandState.Available;
         }
     }
 }
