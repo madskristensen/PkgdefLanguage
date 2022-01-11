@@ -17,8 +17,13 @@ namespace PkgdefLanguage
 
         public override string[] FileExtensions { get; } = new[] { Constants.PkgDefExt, Constants.PkgUndefExt };
 
-        public override TypeAndMemberDropdownBars CreateDropDownHelper(IVsTextView textView) =>
-            _dropdownBars ??= new DropdownBars(textView, this);
+        public override TypeAndMemberDropdownBars CreateDropDownHelper(IVsTextView textView)
+        {
+            _dropdownBars?.Dispose();
+            _dropdownBars = new DropdownBars(textView, this);
+
+            return _dropdownBars;
+        }
 
         public override void SetDefaultPreferences(LanguagePreferences preferences)
         {

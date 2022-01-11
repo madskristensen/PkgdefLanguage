@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
@@ -22,15 +21,13 @@ namespace PkgdefLanguage
         {
             _languageService = languageService;
 
-            IVsEditorAdaptersFactoryService adapter = VS.GetMefService<IVsEditorAdaptersFactoryService>();
-
-            _textView = adapter.GetWpfTextView(textView);
+            _textView = textView.ToIWpfTextView();
             _textView.Caret.PositionChanged += CaretPositionChanged;
 
             _document = _textView.TextBuffer.GetDocument();
             _document.Processed += OnDocumentProcessed;
 
-            SynchronizeDropdowns();
+            //SynchronizeDropdowns();
         }
 
         private void CaretPositionChanged(object sender, CaretPositionChangedEventArgs e) => SynchronizeDropdowns();
