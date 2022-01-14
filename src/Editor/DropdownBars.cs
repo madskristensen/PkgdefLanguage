@@ -16,18 +16,26 @@ namespace PkgdefLanguage
         private bool _disposed;
         private bool _bufferHasChanged;
 
-        public DropdownBars(IVsTextView textView, LanguageService languageService)
-            : base(languageService)
+        public DropdownBars(IVsTextView textView, LanguageService languageService) : base(languageService)
         {
             _languageService = languageService;
-
             _textView = textView.ToIWpfTextView();
-            _textView.Caret.PositionChanged += CaretPositionChanged;
-
             _document = _textView.TextBuffer.GetDocument();
             _document.Processed += OnDocumentProcessed;
 
-            //SynchronizeDropdowns();
+            InitializeAsync(textView).FireAndForget();
+        }
+
+        // This moves the caret to trigger initial drop down load
+        private Task InitializeAsync(IVsTextView textView)
+        {
+            return ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
+            {
+                textView.SendExplicitFocus();
+                _textView.Caret.MoveToNextCaretPosition();
+                _textView.Caret.PositionChanged += CaretPositionChanged;
+                _textView.Caret.MoveToPreviousCaretPosition();
+            }).Task;
         }
 
         private void CaretPositionChanged(object sender, CaretPositionChangedEventArgs e) => SynchronizeDropdowns();
@@ -46,10 +54,7 @@ namespace PkgdefLanguage
 
             _ = ThreadHelper.JoinableTaskFactory.StartOnIdle(() =>
             {
-                if (!_document.IsProcessing)
-                {
-                    _languageService.SynchronizeDropdowns();
-                }
+                _languageService.SynchronizeDropdowns();
             }, VsTaskRunContext.UIThreadIdlePriority);
         }
 
