@@ -6,5 +6,7 @@
         public static string[] CommentChars = new[] { ";", "//" };
         public const string PkgDefExt = ".pkgdef";
         public const string PkgUndefExt = ".pkgundef";
+
+        public const string MarketplaceId = "MadsKristensen.PkgdefLanguage";
     }
 }

@@ -8,7 +8,9 @@
     <UseCodebase>true</UseCodebase>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <NoWarn>MSB3277</NoWarn>
+    <NoWarn>VSTHRD104</NoWarn>
     <DisableWarning>MSB3277</DisableWarning>
+    <DisableWarning>VSTHRD104</DisableWarning>
   </PropertyGroup>
   <PropertyGroup>
   </PropertyGroup>
@@ -70,7 +72,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Community.VisualStudio.Toolkit.16" version="16.0.394" ExcludeAssets="runtime">
+    <PackageReference Include="Community.VisualStudio.Toolkit.16" version="16.0.408" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
@@ -82,6 +84,7 @@
   <ItemGroup>
     <Compile Include="Commands\Formatting.cs" />
     <Compile Include="Editor\DropdownBars.cs" />
+    <Compile Include="Options\AdvancedOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\Commenting.cs" />
     <Compile Include="Constants.cs" />

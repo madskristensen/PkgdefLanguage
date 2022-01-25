@@ -14,6 +14,7 @@ namespace PkgdefLanguage
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuids.PkgdefLanguageString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideOptionPage(typeof(OptionsProvider.AdvancedOptionsPage), "PkgdefLanguage", "Advanced", 0, 0, true, SupportsProfiles = true, NoShowAllView = true)]
 
     [ProvideLanguageService(typeof(LanguageFactory), Constants.LanguageName, 0, EnableLineNumbers = true, EnableAsyncCompletion = true, ShowCompletion = true, EnableFormatSelection = false, ShowDropDownOptions = true)]
     [ProvideLanguageExtension(typeof(LanguageFactory), Constants.PkgDefExt)]

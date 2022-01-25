@@ -27,13 +27,11 @@ namespace PkgdefLanguage
             _buffer.Changed += BufferChanged;
             FileName = buffer.GetFileName();
 
-#pragma warning disable VSTHRD104 // Offer async methods
             ThreadHelper.JoinableTaskFactory.Run(async () =>
             {
                 Project project = await VS.Solutions.GetActiveProjectAsync();
                 ProjectName = project?.Name;
             });
-#pragma warning restore VSTHRD104 // Offer async methods
         }
 
         public bool IsProcessing { get; private set; }

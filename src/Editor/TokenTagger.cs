@@ -51,11 +51,11 @@ namespace PkgdefLanguage
                     return Task.CompletedTask;
                 }
 
-                AddTagToList(list, item);
+                ConvertItemToTag(list, item);
 
                 foreach (ParseItem variable in item.References)
                 {
-                    AddTagToList(list, variable);
+                    ConvertItemToTag(list, variable);
                 }
             }
 
@@ -63,7 +63,7 @@ namespace PkgdefLanguage
             return Task.CompletedTask;
         }
 
-        private void AddTagToList(List<ITagSpan<TokenTag>> list, ParseItem item)
+        private void ConvertItemToTag(List<ITagSpan<TokenTag>> list, ParseItem item)
         {
             var hasTooltip = !item.IsValid;
             var supportsOutlining = item is Entry entry && entry.Properties.Any();

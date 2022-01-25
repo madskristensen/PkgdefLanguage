@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.BraceCompletion;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -75,4 +77,27 @@ namespace PkgdefLanguage
     [TagType(typeof(TextMarkerTag))]
     public class SameWordHighlighter : SameWordHighlighterBase
     { }
+
+    [Export(typeof(IWpfTextViewCreationListener))]
+    [ContentType(Constants.LanguageName)]
+    [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
+    public class UserRatings : WpfTextViewCreationListener
+    {
+        private DateTime _openedDate;
+        private RatingPrompt _rating;
+
+        protected override void Created(DocumentView docView)
+        {
+            _openedDate = DateTime.Now;
+            _rating = new RatingPrompt(Constants.MarketplaceId, Vsix.Name, AdvancedOptions.Instance, 5);
+        }
+
+        protected override void Closed(IWpfTextView textView)
+        {
+            if (_openedDate.AddMinutes(2) < DateTime.Now)
+            {
+                _rating.RegisterSuccessfulUsage();
+            }
+        }
+    }
 }
