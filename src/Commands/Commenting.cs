@@ -35,52 +35,56 @@ namespace PkgdefLanguage
             var snapshot = doc.TextBuffer.CurrentSnapshot;
             int start = doc.TextView.Selection.Start.Position.Position;
             int end = doc.TextView.Selection.End.Position.Position;
-            var editsession = doc.TextBuffer.CreateEdit();
-            while (start < end)
+            using (var editsession = doc.TextBuffer.CreateEdit())
             {
-                var line = snapshot.GetLineFromPosition(start);
-                editsession.Insert(line.Start.Position, Constants.CommentChars[0] + " ");
-                start = line.EndIncludingLineBreak.Position;
+                while (start < end)
+                {
+                    var line = snapshot.GetLineFromPosition(start);
+                    editsession.Insert(line.Start.Position, Constants.CommentChars[0] + " ");
+                    start = line.EndIncludingLineBreak.Position;
+                }
+                editsession.Apply();
             }
-            editsession.Apply();
         }
         private static void Uncomment(DocumentView doc)
         {
             var snapshot = doc.TextBuffer.CurrentSnapshot;
             int start = doc.TextView.Selection.Start.Position.Position;
             int end = doc.TextView.Selection.End.Position.Position;
-            var editsession = doc.TextBuffer.CreateEdit();
-            while (start < end)
+            using (var editsession = doc.TextBuffer.CreateEdit())
             {
-                var line = snapshot.GetLineFromPosition(start);
-                var originalText = line.GetText();
-                var trimmedText = originalText.TrimStart(new char[] { ' ', '\t' });
-                string leading = "";
-                if (trimmedText.Length < originalText.Length)
+                while (start < end)
                 {
-                    leading = originalText.Substring(0, originalText.Length - trimmedText.Length);
-                }
-                int lenToDelete = 0;
-                foreach (var str in Constants.CommentChars)
-                {
-                    if (trimmedText.StartsWith(str))
+                    var line = snapshot.GetLineFromPosition(start);
+                    var originalText = line.GetText();
+                    var trimmedText = originalText.TrimStart(new char[] { ' ', '\t' });
+                    string leading = "";
+                    if (trimmedText.Length < originalText.Length)
                     {
-                        lenToDelete = str.Length;
-                        // delete whitespace after comment chars?
-                        if (trimmedText.Length > str.Length && char.IsWhiteSpace(trimmedText[lenToDelete]))
-                            lenToDelete++;
-                        break;
+                        leading = originalText.Substring(0, originalText.Length - trimmedText.Length);
                     }
+                    int lenToDelete = 0;
+                    foreach (var str in Constants.CommentChars)
+                    {
+                        if (trimmedText.StartsWith(str))
+                        {
+                            lenToDelete = str.Length;
+                            // delete whitespace after comment chars?
+                            if (trimmedText.Length > str.Length && char.IsWhiteSpace(trimmedText[lenToDelete]))
+                                lenToDelete++;
+                            break;
+                        }
+                    }
+                    if (lenToDelete != 0)
+                    {
+                        var pos = line.Start.Position + leading.Length;
+                        Span commentCharSpan = new Span(pos, lenToDelete);
+                        editsession.Delete(commentCharSpan);
+                    }
+                    start = line.EndIncludingLineBreak.Position;
                 }
-                if (lenToDelete != 0)
-                {
-                    var pos = line.Start.Position + leading.Length;
-                    Span commentCharSpan = new Span(pos, lenToDelete);
-                    editsession.Delete(commentCharSpan);
-                }
-                start = line.EndIncludingLineBreak.Position;
+                editsession.Apply();
             }
-            editsession.Apply();
         }
     }
 }
