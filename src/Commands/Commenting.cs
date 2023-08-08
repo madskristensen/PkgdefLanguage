@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Microsoft.VisualStudio;
+﻿using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Formatting;
+using System;
 
 namespace PkgdefLanguage
 {
@@ -35,27 +32,58 @@ namespace PkgdefLanguage
 
         private static void Comment(DocumentView doc)
         {
-            SnapshotSpan spans = doc.TextView.Selection.SelectedSpans.First();
-            Collection<ITextViewLine> lines = doc.TextView.TextViewLines.GetTextViewLinesIntersectingSpan(spans);
-
-            foreach (ITextViewLine line in lines.Reverse())
+            var snapshot = doc.TextBuffer.CurrentSnapshot;
+            int start = doc.TextView.Selection.Start.Position.Position;
+            int end = doc.TextView.Selection.End.Position.Position;
+            using (var editsession = doc.TextBuffer.CreateEdit())
             {
-                doc.TextBuffer.Insert(line.Start.Position, Constants.CommentChars[0]);
+                while (start < end)
+                {
+                    var line = snapshot.GetLineFromPosition(start);
+                    editsession.Insert(line.Start.Position, Constants.CommentChars[0] + " ");
+                    start = line.EndIncludingLineBreak.Position;
+                }
+                editsession.Apply();
             }
         }
-
         private static void Uncomment(DocumentView doc)
         {
-            SnapshotSpan spans = doc.TextView.Selection.SelectedSpans.First();
-            Collection<ITextViewLine> lines = doc.TextView.TextViewLines.GetTextViewLinesIntersectingSpan(spans);
-
-            foreach (ITextViewLine line in lines.Reverse())
+            var snapshot = doc.TextBuffer.CurrentSnapshot;
+            int start = doc.TextView.Selection.Start.Position.Position;
+            int end = doc.TextView.Selection.End.Position.Position;
+            using (var editsession = doc.TextBuffer.CreateEdit())
             {
-                var span = Span.FromBounds(line.Start, line.End);
-                var originalText = doc.TextBuffer.CurrentSnapshot.GetText(span).TrimStart('/', ';');
-                Span commentCharSpan = new(span.Start, span.Length - originalText.Length);
-
-                doc.TextBuffer.Delete(commentCharSpan);
+                while (start < end)
+                {
+                    var line = snapshot.GetLineFromPosition(start);
+                    var originalText = line.GetText();
+                    var trimmedText = originalText.TrimStart(new char[] { ' ', '\t' });
+                    string leading = "";
+                    if (trimmedText.Length < originalText.Length)
+                    {
+                        leading = originalText.Substring(0, originalText.Length - trimmedText.Length);
+                    }
+                    int lenToDelete = 0;
+                    foreach (var str in Constants.CommentChars)
+                    {
+                        if (trimmedText.StartsWith(str))
+                        {
+                            lenToDelete = str.Length;
+                            // delete whitespace after comment chars?
+                            if (trimmedText.Length > str.Length && char.IsWhiteSpace(trimmedText[lenToDelete]))
+                                lenToDelete++;
+                            break;
+                        }
+                    }
+                    if (lenToDelete != 0)
+                    {
+                        var pos = line.Start.Position + leading.Length;
+                        Span commentCharSpan = new Span(pos, lenToDelete);
+                        editsession.Delete(commentCharSpan);
+                    }
+                    start = line.EndIncludingLineBreak.Position;
+                }
+                editsession.Apply();
             }
         }
     }
