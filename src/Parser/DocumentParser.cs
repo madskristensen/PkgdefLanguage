@@ -7,7 +7,7 @@ namespace PkgdefLanguage
 {
     public partial class Document
     {
-        private static readonly Regex _regexProperty = new(@"^(?<name>""[^""]+""|@)(\s)*(?<equals>=)\s*(?<value>((dword:|hex).+|"".+))", RegexOptions.Compiled);
+        private static readonly Regex _regexProperty = new(@"^(?<name>""[^""]+""|@)(\s)*(?<equals>=)\s*(?<value>((dword:|qword:|hex).+|"".+))", RegexOptions.Compiled);
         private static readonly Regex _regexRef = new(@"\$[\w]+\$?", RegexOptions.Compiled);
 
         public void Parse()
