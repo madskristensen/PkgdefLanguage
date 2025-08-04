@@ -12,10 +12,10 @@
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
-		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
 			<ProductArchitecture>arm64</ProductArchitecture>
 		</InstallationTarget>
     </Installation>
@@ -26,7 +26,4 @@
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" DisplayName="Visual Studio core editor" />
     </Prerequisites>
-    <Dependencies>
-        <Dependency Id="Microsoft.VisualStudio.MPF.16.0" DisplayName="Visual Studio MPF 16.0" d:Source="Installed" Version="[16.0,17.0)" />
-    </Dependencies>
 </PackageManifest>
