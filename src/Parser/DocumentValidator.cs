@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.Shell.Interop;
 using type = Microsoft.VisualStudio.Text.Adornments.PredefinedErrorTypeNames;
@@ -31,15 +32,25 @@ namespace PkgdefLanguage
         {
             IsValid = true;
 
-            foreach (ParseItem item in Items)
+            // Pre-create sets for faster lookups
+            var registryKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var predefinedVariables = new HashSet<string>(
+                PredefinedVariables.Variables.Keys,
+                StringComparer.OrdinalIgnoreCase);
+
+            // Single pass validation with optimized lookups
+            for (int i = 0; i < Items.Count; i++)
             {
+                ParseItem item = Items[i];
+
                 // Unknown symbols
                 if (item.Type == ItemType.Unknown)
                 {
                     AddError(item, Errors.PL001);
+                    continue;
                 }
 
-                // Registry key
+                // Registry key validation
                 if (item.Type == ItemType.RegistryKey)
                 {
                     var trimmedText = item.Text.Trim();
@@ -48,19 +59,14 @@ namespace PkgdefLanguage
                     {
                         AddError(item, Errors.PL002);
                     }
-                    //else if (trimmedText.Contains("/") && !trimmedText.Contains("\\/"))
-                    //{
-                    //    AddError(item, Errors.PL003);
-                    //}
 
-                    var index = Items.IndexOf(item);
-                    if (Items.Take(index).Any(i => i.Type == ItemType.RegistryKey && item.Text == i.Text))
+                    // Check for duplicate registry keys using HashSet for O(1) lookup
+                    if (!registryKeys.Add(trimmedText))
                     {
                         AddError(item, Errors.PL008.WithFormat(trimmedText));
                     }
                 }
-
-                // Properties
+                // Property validation
                 else if (item.Type == ItemType.Operator)
                 {
                     ParseItem name = item.Previous;
@@ -78,9 +84,8 @@ namespace PkgdefLanguage
                         AddError(name, Errors.PL005);
                     }
                 }
-
-                // Make sure strings are correctly closed with quotation mark
-                if (item.Type == ItemType.String)
+                // String validation
+                else if (item.Type == ItemType.String)
                 {
                     if (!item.Text.EndsWith("\""))
                     {
@@ -88,25 +93,27 @@ namespace PkgdefLanguage
                     }
                 }
 
-                // References
-                foreach (ParseItem reference in item.References)
+                // Reference validation - batch process for better performance
+                if (item.References.Count > 0)
                 {
-                    var refTrim = reference.Text.Trim();
+                    ValidateReferences(item, predefinedVariables);
+                }
+            }
+        }
 
-                    //if (!refTrim.EndsWith("$"))
-                    //{
-                    //    AddError(reference, Errors.PL007);
-                    //}
-                    //else
-                    //{
-                    if (refTrim.EndsWith("$"))
+        private void ValidateReferences(ParseItem item, HashSet<string> predefinedVariables)
+        {
+            foreach (ParseItem reference in item.References)
+            {
+                var refTrim = reference.Text.Trim();
+
+                if (refTrim.EndsWith("$"))
+                {
+                    var variableName = refTrim.Trim('$');
+                    if (!predefinedVariables.Contains(variableName))
                     {
-                        if (!PredefinedVariables.Variables.Any(v => v.Key.Equals(refTrim.Trim('$'), StringComparison.OrdinalIgnoreCase)))
-                        {
-                            AddError(reference, Errors.PL006.WithFormat(refTrim));
-                        }
+                        AddError(reference, Errors.PL006.WithFormat(refTrim));
                     }
-                    //}
                 }
             }
         }

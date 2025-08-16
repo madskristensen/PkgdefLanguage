@@ -9,21 +9,28 @@ namespace PkgdefLanguage
     {
         private static readonly Regex _regexProperty = new(@"^(?<name>""[^""]+""|@)(\s)*(?<equals>=)\s*(?<value>((dword:|qword:|hex).+|"".+))", RegexOptions.Compiled);
         private static readonly Regex _regexRef = new(@"\$[\w]+\$?", RegexOptions.Compiled);
+        
+        // Pre-allocate reusable collections to reduce GC pressure
+        private readonly List<ParseItem> _tempItems = new(256);
+        private readonly List<ParseItem> _tempReferences = new(16);
 
         public void Parse()
         {
             var start = 0;
-
-            List<ParseItem> items = new();
+            
+            // Reuse the temporary list instead of creating new ones
+            _tempItems.Clear();
 
             foreach (var line in _lines)
             {
-                IEnumerable<ParseItem> current = ParseLine(start, line, items);
-                items.AddRange(current);
+                IEnumerable<ParseItem> current = ParseLine(start, line, _tempItems);
+                _tempItems.AddRange(current);
                 start += line.Length;
             }
 
-            Items = items;
+            // Create a new list with the exact capacity needed
+            Items = new List<ParseItem>(_tempItems.Count);
+            Items.AddRange(_tempItems);
         }
 
         private Entry _currentEntry = null;
@@ -31,7 +38,7 @@ namespace PkgdefLanguage
         private IEnumerable<ParseItem> ParseLine(int start, string line, List<ParseItem> tokens)
         {
             var trimmedLine = line.Trim();
-            List<ParseItem> items = new();
+            var items = new List<ParseItem>(4); // Most lines have 1-3 items
 
             // Comment
             if (trimmedLine.StartsWith(Constants.CommentChars[0]) || trimmedLine.StartsWith(Constants.CommentChars[1]))
@@ -114,10 +121,19 @@ namespace PkgdefLanguage
 
         private void AddVariableReferences(ParseItem token)
         {
+            // Clear and reuse the temporary references list
+            _tempReferences.Clear();
+            
             foreach (Match match in _regexRef.Matches(token.Text))
             {
                 ParseItem reference = ToParseItem(match.Value, token.Span.Start + match.Index, ItemType.Reference, false);
-                token.References.Add(reference);
+                _tempReferences.Add(reference);
+            }
+            
+            // Only allocate the actual references list if we have references
+            if (_tempReferences.Count > 0)
+            {
+                token.References.AddRange(_tempReferences);
             }
         }
     }

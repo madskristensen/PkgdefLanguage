@@ -31,41 +31,47 @@ namespace PkgdefLanguage
         private static void Format(ITextBuffer buffer)
         {
             Document doc = buffer.GetDocument();
-            var sb = new StringBuilder();
+            
+            // Pre-calculate capacity to reduce StringBuilder reallocations
+            int estimatedCapacity = buffer.CurrentSnapshot.Length + (doc.Items.OfType<Entry>().Count() * 2);
+            var sb = new StringBuilder(estimatedCapacity);
 
-            foreach (ParseItem item in doc.Items)
+            // Cache entries for better performance
+            var entries = doc.Items.OfType<Entry>().ToList();
+            
+            for (int i = 0; i < entries.Count; i++)
             {
-                if (item is Entry entry)
+                Entry entry = entries[i];
+                var insertLineBefore = true;
+
+                if (!entry.Properties.Any() && i + 1 < entries.Count)
                 {
-                    var insertLineBefore = true;
+                    Entry next = entries[i + 1];
+                    var currentKey = entry.RegistryKey.Text.Trim().TrimEnd(']');
+                    var nextKey = next.RegistryKey.Text.Trim().TrimEnd(']');
 
-                    if (!entry.Properties.Any() && NextEntry(entry) is Entry next)
+                    if (nextKey.IndexOf(currentKey, StringComparison.OrdinalIgnoreCase) > -1)
                     {
-                        var currentKey = entry.RegistryKey.Text.Trim().TrimEnd(']');
-                        var nextKey = next.RegistryKey.Text.Trim().TrimEnd(']');
-
-                        if (nextKey.IndexOf(currentKey, StringComparison.OrdinalIgnoreCase) > -1)
-                        {
-                            insertLineBefore = false;
-                        }
+                        insertLineBefore = false;
                     }
-
-                    sb.AppendLine();
-
-                    if (insertLineBefore)
-                    {
-                        sb.AppendLine(entry.GetFormattedText());
-                    }
-                    else
-                    {
-                        sb.Append(entry.GetFormattedText());
-                    }
-
                 }
-                else if (item.Type == ItemType.Comment)
+
+                sb.AppendLine();
+
+                if (insertLineBefore)
                 {
-                    sb.AppendLine(item.Text.Trim());
+                    sb.AppendLine(entry.GetFormattedText());
                 }
+                else
+                {
+                    sb.Append(entry.GetFormattedText());
+                }
+            }
+
+            // Add comments separately for better performance
+            foreach (ParseItem item in doc.Items.Where(i => i.Type == ItemType.Comment))
+            {
+                sb.AppendLine(item.Text.Trim());
             }
 
             var wholeDocSpan = new Span(0, buffer.CurrentSnapshot.Length);

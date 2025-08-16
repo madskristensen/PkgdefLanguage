@@ -13,6 +13,7 @@ namespace PkgdefLanguage
         private string[] _lines;
         private bool _isDisposed;
         private readonly ITextBuffer _buffer;
+        private string _lastParsedContentHash;
 
         protected Document(string[] lines)
         {
@@ -50,6 +51,14 @@ namespace PkgdefLanguage
         private void BufferChanged(object sender, TextContentChangedEventArgs e)
         {
             UpdateLines(_buffer.CurrentSnapshot.Lines.Select(line => line.GetTextIncludingLineBreak()).ToArray());
+            
+            // Skip processing if content hasn't actually changed (helps with rapid typing)
+            string currentContentHash = GetContentHash(_lines);
+            if (currentContentHash == _lastParsedContentHash)
+            {
+                return;
+            }
+            
             ProcessAsync().FireAndForget();
         }
 
@@ -61,6 +70,12 @@ namespace PkgdefLanguage
 
         public async Task ProcessAsync()
         {
+            // Avoid multiple concurrent processing operations
+            if (IsProcessing)
+            {
+                return;
+            }
+            
             IsProcessing = true;
             var success = false;
 
@@ -68,8 +83,18 @@ namespace PkgdefLanguage
 
             try
             {
+                string currentContentHash = GetContentHash(_lines);
+                
+                // Skip processing if content hasn't changed since last parse
+                if (currentContentHash == _lastParsedContentHash)
+                {
+                    IsProcessing = false;
+                    return;
+                }
+
                 Parse();
                 ValidateDocument();
+                _lastParsedContentHash = currentContentHash;
                 success = true;
             }
             catch (Exception ex)
@@ -84,6 +109,20 @@ namespace PkgdefLanguage
                 {
                     Processed?.Invoke(this);
                 }
+            }
+        }
+
+        private string GetContentHash(string[] lines)
+        {
+            // Simple hash to detect content changes
+            unchecked
+            {
+                int hash = 17;
+                foreach (var line in lines)
+                {
+                    hash = hash * 31 + (line?.GetHashCode() ?? 0);
+                }
+                return hash.ToString();
             }
         }
 

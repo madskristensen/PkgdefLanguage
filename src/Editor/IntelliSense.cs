@@ -31,6 +31,10 @@ namespace PkgdefLanguage
     public class AsyncCompletionSource : IAsyncCompletionSource
     {
         private static readonly ImageElement _referenceIcon = new(KnownMonikers.LocalVariable.ToImageId(), "Variable");
+        
+        // Cache completion items for variables since they don't change
+        private static ImmutableArray<CompletionItem> _cachedVariableCompletions;
+        private static readonly object _cacheLock = new object();
 
         public Task<CompletionContext> GetCompletionContextAsync(IAsyncCompletionSession session, CompletionTrigger trigger, SnapshotPoint triggerLocation, SnapshotSpan applicableToSpan, CancellationToken cancellationToken)
         {
@@ -61,13 +65,40 @@ namespace PkgdefLanguage
                 IEnumerable<string> prevKeys = item.Text.Substring(0, previousKey).Split('\\').Skip(1);
                 RegistryKey root = VSRegistry.RegistryRoot(__VsLocalRegistryType.RegType_Configuration);
                 RegistryKey parent = root;
+                var keysToDispose = new List<RegistryKey>();
 
-                foreach (var subKey in prevKeys)
+                try
                 {
-                    parent = parent.OpenSubKey(subKey);
-                }
+                    foreach (var subKey in prevKeys)
+                    {
+                        var nextKey = parent.OpenSubKey(subKey);
+                        if (nextKey == null)
+                        {
+                            return null; // Path doesn't exist
+                        }
+                        
+                        if (parent != root) // Don't dispose the root key
+                        {
+                            keysToDispose.Add(parent);
+                        }
+                        parent = nextKey;
+                    }
 
-                return parent?.GetSubKeyNames()?.Select(s => new CompletionItem(s, this, _referenceIcon));
+                    return parent?.GetSubKeyNames()?.Select(s => new CompletionItem(s, this, _referenceIcon));
+                }
+                finally
+                {
+                    // Properly dispose all opened registry keys
+                    foreach (var keyToDispose in keysToDispose)
+                    {
+                        keyToDispose?.Dispose();
+                    }
+                    
+                    if (parent != root)
+                    {
+                        parent?.Dispose();
+                    }
+                }
             }
 
             return null;
@@ -75,12 +106,26 @@ namespace PkgdefLanguage
 
         private IEnumerable<CompletionItem> GetReferenceCompletion()
         {
-            foreach (var key in PredefinedVariables.Variables.Keys)
+            // Thread-safe lazy initialization of cached completion items
+            if (_cachedVariableCompletions.IsDefault)
             {
-                var completion = new CompletionItem(key, this, _referenceIcon, ImmutableArray<CompletionFilter>.Empty, "", $"${key}$", key, key, ImmutableArray<ImageElement>.Empty);
-                completion.Properties.AddProperty("description", PredefinedVariables.Variables[key]);
-                yield return completion;
+                lock (_cacheLock)
+                {
+                    if (_cachedVariableCompletions.IsDefault)
+                    {
+                        var completions = new List<CompletionItem>();
+                        foreach (var key in PredefinedVariables.Variables.Keys)
+                        {
+                            var completion = new CompletionItem(key, this, _referenceIcon, ImmutableArray<CompletionFilter>.Empty, "", $"${key}$", key, key, ImmutableArray<ImageElement>.Empty);
+                            completion.Properties.AddProperty("description", PredefinedVariables.Variables[key]);
+                            completions.Add(completion);
+                        }
+                        _cachedVariableCompletions = completions.ToImmutableArray();
+                    }
+                }
             }
+            
+            return _cachedVariableCompletions;
         }
 
         public Task<object> GetDescriptionAsync(IAsyncCompletionSession session, CompletionItem item, CancellationToken token)
@@ -114,7 +159,7 @@ namespace PkgdefLanguage
 
                 if (column < 1)
                 {
-                    return CompletionStartData.DoesNotParticipateInCompletion; ;
+                    return CompletionStartData.DoesNotParticipateInCompletion;
                 }
 
                 var start = item.Text.LastIndexOf('\\', column - 1) + 1;
