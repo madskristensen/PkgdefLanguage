@@ -32,6 +32,7 @@ namespace PkgdefLanguage
     {
         private static readonly ImageElement _referenceIcon = new(KnownMonikers.LocalVariable.ToImageId(), "Variable");
         private static readonly ImageElement _propertyIcon = new(KnownMonikers.Property.ToImageId(), "Property");
+        private static readonly ImageElement _valueIcon = new(KnownMonikers.ValueType.ToImageId(), "Value");
 
         // Cache completion items for variables since they don't change
         private static ImmutableArray<CompletionItem> _cachedVariableCompletions;
@@ -230,7 +231,7 @@ namespace PkgdefLanguage
                                 completionItems.Add(new CompletionItem(
                                     displayText: "\"\"",
                                     source: this,
-                                    icon: _propertyIcon,
+                                    icon: _valueIcon,
                                     filters: ImmutableArray<CompletionFilter>.Empty,
                                     suffix: string.Empty,
                                     insertText: "\"\"",
@@ -323,7 +324,7 @@ namespace PkgdefLanguage
                                     completionItems.Add(new CompletionItem(
                                         displayText: displayText,
                                         source: this,
-                                        icon: _propertyIcon,
+                                        icon: _valueIcon,
                                         filters: ImmutableArray<CompletionFilter>.Empty,
                                         suffix: string.Empty,
                                         insertText: insertText,
@@ -348,7 +349,7 @@ namespace PkgdefLanguage
                                             completionItems.Add(new CompletionItem(
                                                 displayText: guid,
                                                 source: this,
-                                                icon: _propertyIcon,
+                                                icon: _valueIcon,
                                                 filters: ImmutableArray<CompletionFilter>.Empty,
                                                 suffix: string.Empty,
                                                 insertText: $"\"{guid}\"",
