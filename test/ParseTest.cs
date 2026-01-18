@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PkgdefLanguage.Test
 {
     [TestClass]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
     public class ParseTest
     {
         [TestMethod]
@@ -20,10 +20,10 @@ namespace PkgdefLanguage.Test
             await doc.WaitForParsingCompleteAsync();
             var entries = doc.Items.OfType<Entry>().ToList();
 
-            Assert.AreEqual(1, entries.Count);
+            Assert.HasCount(1, entries);
 
             Entry entry = entries.First();
-            Assert.AreEqual(1, entry.Properties.Count);
+            Assert.HasCount(1, entry.Properties);
             Assert.AreEqual("@", entry.Properties.First().Name.Text);
             Assert.AreEqual(16, entry.Span.End);
         }
@@ -39,7 +39,7 @@ namespace PkgdefLanguage.Test
             await doc.WaitForParsingCompleteAsync();
             var entries = doc.Items.OfType<Entry>().ToList();
 
-            Assert.AreEqual(1, entries.Count);
+            Assert.HasCount(1, entries);
 
             Entry entry = entries.First();
             Assert.AreEqual("\"test=1234\"", entry.Properties.First().Value.Text);
@@ -60,12 +60,12 @@ namespace PkgdefLanguage.Test
             var entries = doc.Items.OfType<Entry>().ToList();
 
 
-            Assert.AreEqual(2, entries.Count);
+            Assert.HasCount(2, entries);
 
             Entry first = entries.First();
             Entry second = entries.Last();
 
-            Assert.AreEqual(2, first.Properties.Count);
+            Assert.HasCount(2, first.Properties);
             Assert.AreEqual(29, first.Span.End);
             Assert.AreEqual("@", second.Properties.First().Name.Text);
             Assert.AreEqual(45, second.Span.End);
@@ -82,7 +82,7 @@ namespace PkgdefLanguage.Test
             var doc = Document.FromLines(lines);
             await doc.WaitForParsingCompleteAsync();
 
-            Assert.AreEqual(2, doc.Items.Count);
+            Assert.HasCount(2, doc.Items);
             Assert.AreEqual(2, doc.Items.Where(i => i.Type == ItemType.Comment).Count());
         }
 
