@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.Core.Imaging;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Utilities;
@@ -8,7 +9,6 @@ using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +69,6 @@ namespace PkgdefLanguage
                     return Task.FromResult(variableQuickInfo);
                 }
             }
-        }
 
             return Task.FromResult<QuickInfoItem>(null);
         }
@@ -85,10 +84,10 @@ namespace PkgdefLanguage
                 var textRuns = new List<ClassifiedTextRun>
                 {
                     // Variable name in emphasized text (not overly colorful)
-                    new ClassifiedTextRun("text", variableName, ClassifiedTextRunStyle.Bold),
-                    new ClassifiedTextRun("text", Environment.NewLine + Environment.NewLine),
+                    new(PredefinedClassificationTypeNames.Text, variableName, ClassifiedTextRunStyle.Bold),
+                    new(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine),
                     // Description in plain text for readability
-                    new ClassifiedTextRun("text", description)
+                    new(PredefinedClassificationTypeNames.Text, description)
                 };
 
                 var textElement = new ClassifiedTextElement(textRuns);
@@ -103,26 +102,6 @@ namespace PkgdefLanguage
             }
 
             return null;
-        }
-
-        private string ResolveVariablesInText(string text)
-        {
-            string resolved = text;
-
-            // Find all variable references and replace them with their values or descriptions
-            foreach (Match match in _regexRef.Matches(text))
-            {
-                string variableName = match.Value.Trim('$');
-
-                if (PredefinedVariables.Variables.TryGetValue(variableName, out string description))
-                {
-                    // For the tooltip, we'll show a placeholder instead of the actual value
-                    // since we don't have runtime values, just descriptions
-                    resolved = resolved.Replace(match.Value, $"[{variableName}]");
-                }
-            }
-
-            return resolved;
         }
 
         public void Dispose()

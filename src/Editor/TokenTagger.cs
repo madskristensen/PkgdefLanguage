@@ -91,7 +91,8 @@ namespace PkgdefLanguage
                     Line = line.LineNumber,
                     Column = item.Span.Start - line.Start.Position,
                     BuildTool = Vsix.Name,
-                    ErrorCode = error.ErrorCode
+                    ErrorCode = error.ErrorCode,
+                    HelpLink = error.HelpLink
                 };
             }
         }

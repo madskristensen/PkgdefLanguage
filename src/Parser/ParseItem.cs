@@ -84,18 +84,22 @@ namespace PkgdefLanguage
 
     public class Error
     {
+        private const string BaseHelpUrl = "https://github.com/madskristensen/PkgdefLanguage/blob/master/errors.md";
+
         public Error(string errorCode, string message, string category, __VSERRORCATEGORY severity)
         {
             ErrorCode = errorCode;
             Message = message;
             Category = category;
             Severity = severity;
+            HelpLink = $"{BaseHelpUrl}#{errorCode}";
         }
 
         public string ErrorCode { get; }
         public string Message { get; }
         public string Category { get; }
         public __VSERRORCATEGORY Severity { get; }
+        public string HelpLink { get; }
 
         public Error WithFormat(params string[] replacements)
         {

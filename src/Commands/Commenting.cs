@@ -78,7 +78,7 @@ namespace PkgdefLanguage
                     if (lenToDelete != 0)
                     {
                         var pos = line.Start.Position + leading.Length;
-                        Span commentCharSpan = new Span(pos, lenToDelete);
+                        Span commentCharSpan = new(pos, lenToDelete);
                         editsession.Delete(commentCharSpan);
                     }
                     start = line.EndIncludingLineBreak.Position;

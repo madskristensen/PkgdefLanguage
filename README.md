@@ -24,7 +24,29 @@ Full completion provided for variables and registry keys.
 ![IntelliSense](art/intellisense.gif)
 
 ## Validation
-There's validation for both syntax errors, unknown variables, and more to help you avoid mistakes.
+The extension provides comprehensive validation to help you avoid mistakes in your .pkgdef files:
+
+**Syntax Validation:**
+- Unclosed registry key brackets
+- Missing or incorrect quotation marks on property names
+- Forward slashes in registry paths (should be backslashes)
+- Unknown tokens and malformed syntax
+
+**Variable Validation:**
+- Unknown or undefined variables
+- Invalid variable syntax (missing `$` delimiters)
+- Typos in variable names
+
+**Registry Value Type Validation:**
+- **DWORD values** - Must be exactly 8 hexadecimal characters (e.g., `dword:0000007b`)
+- **QWORD values** - Must be exactly 16 hexadecimal characters (e.g., `qword:00000000ffffffff`)
+- **HEX arrays** - Must be comma-separated 2-digit hexadecimal bytes (e.g., `hex:01,02,03,04,ff`)
+
+**Semantic Validation:**
+- Duplicate registry key definitions
+- Quoted `@` symbol (default value should be unquoted)
+
+For detailed information about each validation error, including examples and fixes, see the [Error Reference](errors.md).
 
 ![Validation](art/validation.png)
 
@@ -38,41 +60,6 @@ The extension provides automatic code fixes for common errors. Simply press `Ctr
 - **Forward slashes in paths** - Converts `/` to `\` in registry paths
 - **Quoted @ sign** - Removes quotes from default value property (`"@"` → `@`)
 - **Unquoted property names** - Surrounds property names with required quotation marks
-
-### Value Type Validation
-Registry property values are validated to ensure correct format:
-
-<!-- TODO: Add screenshot showing dword/qword/hex validation errors -->
-
-- **DWORD values** (`dword:`) - Must be exactly 8 hexadecimal characters
-  - ✅ Valid: `dword:0000007b`
-  - ❌ Invalid: `dword:7b` (too short)
-  - ❌ Invalid: `dword:GGGGGGGG` (invalid characters)
-
-- **QWORD values** (`qword:`) - Must be exactly 16 hexadecimal characters
-  - ✅ Valid: `qword:00000000ffffffff`
-  - ❌ Invalid: `qword:00000000` (too short)
-
-- **HEX arrays** (`hex:` or `hex(X):`) - Must be comma-separated 2-digit hex bytes
-  - ✅ Valid: `hex:01,02,03,04,ff`
-  - ❌ Invalid: `hex:0102,03,04` (wrong format)
-  - ❌ Invalid: `hex:GG,02,03` (invalid characters)
-
-### Validation Error Codes
-
-| Code  | Description                    | Severity      | Has Quick Fix |
-|-------|--------------------------------|---------------|---------------|
-| PL001 | Unknown token                  | Error         | ❌            |
-| PL002 | Unclosed registry key          | Error         | ✅            |
-| PL003 | Forward slash in path          | Error         | ✅            |
-| PL004 | Quoted @ sign                  | Warning       | ✅            |
-| PL005 | Missing quotes on property     | Error         | ✅            |
-| PL006 | Unknown variable               | Warning       | ❌            |
-| PL007 | Invalid variable syntax        | Error         | ❌            |
-| PL008 | Duplicate registry key         | Info          | ❌            |
-| PL009 | Invalid dword value            | Error         | ❌            |
-| PL010 | Invalid qword value            | Error         | ❌            |
-| PL011 | Invalid hex array value        | Error         | ❌            |
 
 ## Outlining
 Collapse sections for better overview of the document.
