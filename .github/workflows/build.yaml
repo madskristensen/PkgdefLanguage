@@ -7,7 +7,6 @@ on:
   pull_request:
     branches: [master]
   workflow_dispatch:
-    branches: [master]
       
 jobs:
   build:
@@ -22,10 +21,10 @@ jobs:
       VsixManifestSourcePath: src\source.extension.cs
       
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup .NET build dependencies
-      uses: timheuer/bootstrap-dotnet@v1
+      uses: timheuer/bootstrap-dotnet@v2
       with:
         nuget: 'false'
         sdk: 'false'
@@ -33,7 +32,7 @@ jobs:
 
     - name: Increment VSIX version
       id: vsix_version
-      uses: timheuer/vsix-version-stamp@v1
+      uses: timheuer/vsix-version-stamp@v2
       with:
         manifest-file: ${{ env.VsixManifestPath }}
         vsix-token-source-file: ${{ env.VsixManifestSourcePath }}
@@ -74,7 +73,7 @@ jobs:
       - name: Tag and Release
         if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]') }}
         id: tag_release
-        uses: softprops/action-gh-release@v0.1.13
+        uses: softprops/action-gh-release@2
         with:
           body: Release ${{ needs.build.outputs.version }}
           tag_name: ${{ needs.build.outputs.version }}

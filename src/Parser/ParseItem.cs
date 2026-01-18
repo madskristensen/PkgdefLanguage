@@ -8,6 +8,7 @@ namespace PkgdefLanguage
     public class ParseItem
     {
         public HashSet<Error> _errors = new();
+        internal int _cachedIndex = -1;
 
         public ParseItem(int start, string text, Document document, ItemType type)
         {
@@ -37,7 +38,8 @@ namespace PkgdefLanguage
         {
             get
             {
-                var index = Document.Items.IndexOf(this);
+                // Use cached index to avoid O(n) IndexOf call
+                int index = _cachedIndex >= 0 ? _cachedIndex : Document.Items.IndexOf(this);
                 return index > 0 ? Document.Items[index - 1] : null;
             }
         }
@@ -46,8 +48,9 @@ namespace PkgdefLanguage
         {
             get
             {
-                var index = Document.Items.IndexOf(this);
-                return Document.Items.ElementAtOrDefault(index + 1);
+                // Use cached index to avoid O(n) IndexOf call
+                int index = _cachedIndex >= 0 ? _cachedIndex : Document.Items.IndexOf(this);
+                return index < Document.Items.Count - 1 ? Document.Items[index + 1] : null;
             }
         }
 
