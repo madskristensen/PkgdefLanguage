@@ -19,7 +19,15 @@ Syntax highlighting makes it easy to parse the document. Here's what it looks li
 ![Colorization](art/colorization.png)
 
 ## IntelliSense
-Full completion provided for variables and registry keys.
+Full completion is provided throughout your .pkgdef files to speed up development and reduce errors:
+
+**Variables** - Type `$` to see all available predefined variables like `$RootKey$`, `$PackageFolder$`, `$RootFolder$`, etc.
+
+**Registry Keys** - When typing registry paths within `[]` brackets, get suggestions for valid subkeys based on your current path in the registry hive.
+
+**Property Names** - After defining a registry key, get completion for common property names.
+
+**Property Values** - When assigning values, get suggestions for common registry value types like `dword:`, `qword:`, and `hex:`.
 
 ![IntelliSense](art/intellisense.gif)
 
@@ -53,13 +61,25 @@ For detailed information about each validation error, including examples and fix
 ### Quick Fixes
 The extension provides automatic code fixes for common errors. Simply press `Ctrl+.` on any error to see available fixes:
 
-<!-- TODO: Add screenshot of lightbulb quick fixes in action -->
+![Code Fix](art/code-fix.png)
 
 **Available Quick Fixes:**
 - **Missing closing bracket** - Automatically adds the missing `]` to registry keys
 - **Forward slashes in paths** - Converts `/` to `\` in registry paths
 - **Quoted @ sign** - Removes quotes from default value property (`"@"` → `@`)
 - **Unquoted property names** - Surrounds property names with required quotation marks
+
+## Quick Info
+Hover over elements to get helpful information:
+
+**Variable Information:**
+- Hover over any variable (e.g., `$RootKey$`) to see its description and what it resolves to
+
+**Error Details:**
+- Hover over validation errors to see the error message and clickable error code
+- Click the error code to open detailed documentation with examples and fixes
+
+![Quick Info](art/quick-info.png)
 
 ## Outlining
 Collapse sections for better overview of the document.
@@ -72,12 +92,6 @@ Notice how only comments starting with a semicolon is correctly identified as a 
 You can format the whole document `Ctrl+K,Ctrl+D` or the current selection `Ctrl+K,Ctrl+F`. It will add a line break between registry key entries, trim whitespace, and other clean-up formatting.
 
 ![Formatting](art/formatting.png)
-
-## Testing Quick Fixes
-
-To test the new quick fix features, open the included `test-quickfixes.pkgdef` file in Visual Studio. Place your cursor on any error (red squiggle) and press `Ctrl+.` to see available quick fixes. Each section demonstrates a different type of validation error and its corresponding fix.
-
-<!-- TODO: Add screenshot showing test file with various errors -->
 
 ---
 

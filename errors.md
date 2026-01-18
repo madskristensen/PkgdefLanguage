@@ -14,14 +14,14 @@ This document provides detailed information about validation errors in the Pkgde
 - Text outside of registry key declarations or comments
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 SomeRandomText
 "ValidProperty"="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 ; SomeRandomText (comment added)
 "ValidProperty"="Value"
@@ -38,13 +38,13 @@ SomeRandomText
 - Line breaks before the closing bracket
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage
 "Property"="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Property"="Value"
 ```
@@ -60,12 +60,12 @@ SomeRandomText
 - Copy-pasting Unix-style paths
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$/MyPackage/SubKey]
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage\SubKey]
 ```
 
@@ -79,13 +79,13 @@ SomeRandomText
 - Wrapping the `@` symbol in quotation marks
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "@"="Default Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 @="Default Value"
 ```
@@ -102,13 +102,13 @@ SomeRandomText
 - Single quotes instead of double quotes
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 MyProperty="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "MyProperty"="Value"
 ```
@@ -125,12 +125,12 @@ MyProperty="Value"
 - Missing variable from the predefined list
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKy$\MyPackage]  ; Typo: RootKy instead of RootKey
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 ```
 
@@ -162,12 +162,12 @@ MyProperty="Value"
 - Using other characters as variable delimiters
 
 **Example - Before:**
-```pkgdef
+```ini
 [RootKey$\MyPackage]  ; Missing opening $
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 ```
 
@@ -182,7 +182,7 @@ MyProperty="Value"
 - Copy-pasting registry key sections
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Property1"="Value1"
 
@@ -191,7 +191,7 @@ MyProperty="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Property1"="Value1"
 "Property2"="Value2"
@@ -210,7 +210,7 @@ MyProperty="Value"
 - Missing hex value after `dword:`
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Value1"=dword:7b           ; Too short
 "Value2"=dword:123456789    ; Too long
@@ -218,7 +218,7 @@ MyProperty="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Value1"=dword:0000007b
 "Value2"=dword:12345678
@@ -238,7 +238,7 @@ MyProperty="Value"
 - Missing hex value after `qword:`
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Value1"=qword:7b                 ; Too short
 "Value2"=qword:12345678901234567  ; Too long
@@ -246,7 +246,7 @@ MyProperty="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Value1"=qword:000000000000007b
 "Value2"=qword:1234567890123456
@@ -266,7 +266,7 @@ MyProperty="Value"
 - Missing value after `hex:` or `hex(X):`
 
 **Example - Before:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Value1"=hex:01020304        ; Missing commas
 "Value2"=hex:1,2,3,4         ; Each byte needs 2 digits
@@ -274,7 +274,7 @@ MyProperty="Value"
 ```
 
 **Example - After:**
-```pkgdef
+```ini
 [$RootKey$\MyPackage]
 "Value1"=hex:01,02,03,04
 "Value2"=hex:01,02,03,04

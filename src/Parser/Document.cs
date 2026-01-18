@@ -178,6 +178,18 @@ namespace PkgdefLanguage
                 }
             }
 
+            // For Entry items, also check the RegistryKey's references
+            if (item is Entry entry && entry.RegistryKey?.References.Count > 0)
+            {
+                foreach (ParseItem reference in entry.RegistryKey.References)
+                {
+                    if (reference != null && (reference.Span.Contains(position) || reference.Span.Contains(position - 1)))
+                    {
+                        return reference;
+                    }
+                }
+            }
+
             return item;
         }
 

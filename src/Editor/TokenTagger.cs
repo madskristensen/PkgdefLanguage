@@ -25,7 +25,6 @@ namespace PkgdefLanguage
     internal class TokenTagger : TokenTaggerBase, IDisposable
     {
         private readonly Document _document;
-        private static readonly ImageId _errorIcon = KnownMonikers.StatusWarningNoColor.ToImageId();
         private bool _isDisposed;
 
         internal TokenTagger(ITextBuffer buffer) : base(buffer)
@@ -92,32 +91,14 @@ namespace PkgdefLanguage
                     Column = item.Span.Start - line.Start.Position,
                     BuildTool = Vsix.Name,
                     ErrorCode = error.ErrorCode,
-                    HelpLink = error.HelpLink
-                };
-            }
-        }
+                                HelpLink = error.HelpLink
+                            };
+                        }
+                    }
 
-        public override Task<object> GetTooltipAsync(SnapshotPoint triggerPoint)
-        {
-            ParseItem item = _document.FindItemFromPosition(triggerPoint.Position);
-
-            // Error messages
-            if (item?.IsValid == false)
-            {
-                ContainerElement elm = new(
-                    ContainerElementStyle.Wrapped,
-                    new ImageElement(_errorIcon),
-                    string.Join(Environment.NewLine, item.Errors.Select(e => e.Message)));
-
-                return Task.FromResult<object>(elm);
-            }
-
-            return Task.FromResult<object>(null);
-        }
-
-        public void Dispose()
-        {
-            if (!_isDisposed)
+                    public void Dispose()
+                    {
+                        if (!_isDisposed)
             {
                 _document.Processed -= DocumentProcessed;
                 _document.Dispose();

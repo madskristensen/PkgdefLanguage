@@ -10,6 +10,10 @@
       "targetPath": "art/colorization.png"
     },
     {
+      "pathOnDisk": "art/code-fix.png",
+      "targetPath": "art/code-fix.png"
+    },
+    {
       "pathOnDisk": "art/formatting.png",
       "targetPath": "art/formatting.png"
     },
@@ -20,6 +24,10 @@
     {
       "pathOnDisk": "art/outlining.png",
       "targetPath": "art/outlining.png"
+    },
+    {
+      "pathOnDisk": "art/quick-info.png",
+      "targetPath": "art/quick-info.png"
     },
     {
       "pathOnDisk": "art/validation.png",
