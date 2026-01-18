@@ -128,11 +128,57 @@ namespace PkgdefLanguage
 
         public ParseItem FindItemFromPosition(int position)
         {
-            ParseItem item = Items.LastOrDefault(t => t.Span.Contains(position));
-            ParseItem reference = item?.References.FirstOrDefault(v => v != null && v.Span.Contains(position - 1));
+            // Binary search since items are ordered by position (O(log n) instead of O(n))
+            if (Items.Count == 0)
+            {
+                return null;
+            }
 
-            // Return the reference if it exist; otherwise the item
-            return reference ?? item;
+            int left = 0;
+            int right = Items.Count - 1;
+            ParseItem item = null;
+
+            // Find the last item whose span contains or precedes the position
+            while (left <= right)
+            {
+                int mid = left + (right - left) / 2;
+                ParseItem current = Items[mid];
+
+                if (current.Span.Start <= position)
+                {
+                    if (current.Span.End >= position)
+                    {
+                        // Position is within this item's span
+                        item = current;
+                        break;
+                    }
+                    else
+                    {
+                        // Item ends before position, search right
+                        item = current; // Keep track of last valid item
+                        left = mid + 1;
+                    }
+                }
+                else
+                {
+                    // Item starts after position, search left
+                    right = mid - 1;
+                }
+            }
+
+            // Check if position is within a variable reference
+            if (item?.References.Count > 0)
+            {
+                foreach (ParseItem reference in item.References)
+                {
+                    if (reference != null && reference.Span.Contains(position - 1))
+                    {
+                        return reference;
+                    }
+                }
+            }
+
+            return item;
         }
 
         public void Dispose()

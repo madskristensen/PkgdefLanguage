@@ -86,10 +86,10 @@ namespace PkgdefLanguage
                 _tempLineItems.Add(value);
             }
             // Incomplete property (just property name being typed, no = yet)
-            else if (tokens.Count > 0 && _currentEntry != null && (trimmedLine.StartsWith("\"") || trimmedLine == "@"))
+            else if (tokens.Count > 0 && _currentEntry != null && (trimmedLine.StartsWith("\"", StringComparison.Ordinal) || trimmedLine == "@"))
             {
                 // Colorize the property name even if = hasn't been added yet
-                ItemType type = trimmedLine.StartsWith("\"") ? ItemType.String : ItemType.Literal;
+                ItemType type = trimmedLine.StartsWith("\"", StringComparison.Ordinal) ? ItemType.String : ItemType.Literal;
                 _tempLineItems.Add(ToParseItem(line, start, type, false));
             }
             // Unknown
