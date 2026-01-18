@@ -40,11 +40,6 @@ namespace PkgdefLanguage
     public class ErrorSquigglies : TokenErrorTaggerBase
     { }
 
-    [Export(typeof(IAsyncQuickInfoSourceProvider))]
-    [ContentType(Constants.LanguageName)]
-    internal sealed class Tooltips : TokenQuickInfoBase
-    { }
-
     [Export(typeof(IBraceCompletionContextProvider))]
     [BracePair('(', ')')]
     [BracePair('[', ']')]
