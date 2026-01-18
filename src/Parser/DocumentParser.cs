@@ -76,6 +76,13 @@ namespace PkgdefLanguage
                 items.Add(equals);
                 items.Add(value);
             }
+            // Incomplete property (just property name being typed, no = yet)
+            else if (tokens.Count > 0 && _currentEntry != null && (trimmedLine.StartsWith("\"") || trimmedLine == "@"))
+            {
+                // Colorize the property name even if = hasn't been added yet
+                ItemType type = trimmedLine.StartsWith("\"") ? ItemType.String : ItemType.Literal;
+                items.Add(ToParseItem(line, start, type, false));
+            }
             // Unknown
             else if (trimmedLine.Length > 0)
             {

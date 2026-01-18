@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <MaxCpuCount>0</MaxCpuCount>
+    <ResultsDirectory>.\TestResults</ResultsDirectory>
+    <TargetFrameworkVersion>.NETFramework,Version=v4.8</TargetFrameworkVersion>
+  </RunConfiguration>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+  <MSTest>
+    <MapInconclusiveToFailed>false</MapInconclusiveToFailed>
+  </MSTest>
+</RunSettings>
