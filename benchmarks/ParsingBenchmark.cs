@@ -2,6 +2,7 @@ using BenchmarkDotNet.Attributes;
 
 using Microsoft.VSDiagnostics;
 
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PkgdefLanguage.Benchmarks
@@ -15,6 +16,46 @@ namespace PkgdefLanguage.Benchmarks
                 await Task.Delay(2);
             }
         }
+
+        public static void WaitForParsingComplete(this Document document)
+        {
+            // Spin wait for more accurate timing (no Task.Delay overhead)
+            var spinWait = new SpinWait();
+            while (document.IsProcessing)
+            {
+                spinWait.SpinOnce();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Test document that exposes synchronous parsing for accurate benchmarking.
+    /// </summary>
+    public class BenchmarkDocument : Document
+    {
+        private BenchmarkDocument(string[] lines) : base(lines)
+        {
+        }
+
+        /// <summary>
+        /// Creates a document and waits for initial async processing to complete.
+        /// </summary>
+        public static BenchmarkDocument Create(string[] lines)
+        {
+            var doc = new BenchmarkDocument(lines);
+            // Wait for the initial async parse triggered by constructor
+            doc.WaitForParsingComplete();
+            return doc;
+        }
+
+        /// <summary>
+        /// Synchronously re-parses the document. Call UpdateLines first to change content.
+        /// </summary>
+        public void ParseSync()
+        {
+            Parse();
+            ValidateDocument();
+        }
     }
 
     [CPUUsageDiagnoser]
@@ -24,6 +65,12 @@ namespace PkgdefLanguage.Benchmarks
         private string[] _smallDocument;
         private string[] _mediumDocument;
         private string[] _largeDocument;
+
+        // Pre-created documents for synchronous parsing benchmarks
+        private BenchmarkDocument _smallDoc;
+        private BenchmarkDocument _mediumDoc;
+        private BenchmarkDocument _largeDoc;
+
         [GlobalSetup]
         public void Setup()
         {
@@ -33,6 +80,11 @@ namespace PkgdefLanguage.Benchmarks
             _mediumDocument = GenerateDocument(500);
             // Large document: 2000 lines (typical large config file)
             _largeDocument = GenerateDocument(2000);
+
+            // Pre-create documents for sync benchmarks
+            _smallDoc = BenchmarkDocument.Create(_smallDocument);
+            _mediumDoc = BenchmarkDocument.Create(_mediumDocument);
+            _largeDoc = BenchmarkDocument.Create(_largeDocument);
         }
 
         private string[] GenerateDocument(int lineCount)
@@ -72,24 +124,24 @@ namespace PkgdefLanguage.Benchmarks
         }
 
         [Benchmark]
-        public async Task ParseSmallDocumentAsync()
+        public void ParseSmallDocument()
         {
-            var doc = Document.FromLines(_smallDocument);
-            await doc.WaitForParsingCompleteAsync();
+            _smallDoc.UpdateLines(_smallDocument);
+            _smallDoc.ParseSync();
         }
 
         [Benchmark]
-        public async Task ParseMediumDocumentAsync()
+        public void ParseMediumDocument()
         {
-            var doc = Document.FromLines(_mediumDocument);
-            await doc.WaitForParsingCompleteAsync();
+            _mediumDoc.UpdateLines(_mediumDocument);
+            _mediumDoc.ParseSync();
         }
 
         [Benchmark(Baseline = true)]
-        public async Task ParseLargeDocumentAsync()
+        public void ParseLargeDocument()
         {
-            var doc = Document.FromLines(_largeDocument);
-            await doc.WaitForParsingCompleteAsync();
+            _largeDoc.UpdateLines(_largeDocument);
+            _largeDoc.ParseSync();
         }
     }
 }

@@ -27,11 +27,11 @@ namespace PkgdefLanguage
 
         private void AddError(ParseItem item, Error error)
         {
-            item.Errors.Add(error);
-            IsValid = false;
-        }
+                item.Errors.Add(error);
+                IsValid = false;
+            }
 
-        private void ValidateDocument()
+            protected void ValidateDocument()
         {
             IsValid = true;
 
@@ -71,7 +71,7 @@ namespace PkgdefLanguage
                 {
                     var trimmedText = item.Text.Trim();
 
-                    if (!trimmedText.EndsWith("]"))
+                    if (!trimmedText.EndsWith("]", StringComparison.Ordinal))
                     {
                         AddError(item, Errors.PL002);
                     }
@@ -120,7 +120,7 @@ namespace PkgdefLanguage
                 // String validation
                 else if (item.Type == ItemType.String)
                 {
-                    if (!item.Text.EndsWith("\""))
+                    if (!item.Text.EndsWith("\"", StringComparison.Ordinal))
                     {
                         AddError(item, Errors.PL005);
                     }
@@ -140,7 +140,7 @@ namespace PkgdefLanguage
             {
                 var refTrim = reference.Text.Trim();
 
-                if (refTrim.EndsWith("$"))
+                if (refTrim.EndsWith("$", StringComparison.Ordinal))
                 {
                     var variableName = refTrim.Trim('$');
                     if (!predefinedVariables.Contains(variableName))

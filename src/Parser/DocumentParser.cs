@@ -50,12 +50,12 @@ namespace PkgdefLanguage
             _tempLineItems.Clear();
 
             // Comment
-            if (trimmedLine.StartsWith(Constants.CommentChars[0]) || trimmedLine.StartsWith(Constants.CommentChars[1]))
+            if (trimmedLine.StartsWith(Constants.CommentChars[0], StringComparison.Ordinal) || trimmedLine.StartsWith(Constants.CommentChars[1], StringComparison.Ordinal))
             {
                 _tempLineItems.Add(ToParseItem(line, start, ItemType.Comment, false));
             }
             // Preprocessor
-            else if (trimmedLine.StartsWith("#include"))
+            else if (trimmedLine.StartsWith("#include", StringComparison.Ordinal))
             {
                 _tempLineItems.Add(ToParseItem(line, start, ItemType.Preprocessor, false));
             }
@@ -96,7 +96,7 @@ namespace PkgdefLanguage
             else if (trimmedLine.Length > 0)
             {
                 // Check for line splits which is a line ending with a backslash
-                var lineSplit = tokens.LastOrDefault()?.Text.TrimEnd().EndsWith("\\") == true;
+                var lineSplit = tokens.LastOrDefault()?.Text.TrimEnd().EndsWith("\\", StringComparison.Ordinal) == true;
                 ItemType type = lineSplit ? tokens.Last().Type : ItemType.Unknown;
                 _tempLineItems.Add(new ParseItem(start, line, this, type));
             }
@@ -131,7 +131,7 @@ namespace PkgdefLanguage
         private ParseItem ToParseItem(Match match, int start, string groupName, bool supportsVariableReferences = true)
         {
             Group group = match.Groups[groupName];
-            ItemType type = group.Value.StartsWith("\"") ? ItemType.String : ItemType.Literal;
+            ItemType type = group.Value.StartsWith("\"", StringComparison.Ordinal) ? ItemType.String : ItemType.Literal;
             return ToParseItem(group.Value, start + group.Index, type, supportsVariableReferences);
         }
 
