@@ -38,9 +38,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Restore NuGet packages
-      run: msbuild -t:restore /p:RestorePackagesConfig=true
-
     - name: Increment VSIX version
       id: vsix_version
       uses: timheuer/vsix-version-stamp@v2
@@ -49,7 +46,7 @@ jobs:
         vsix-token-source-file: ${{ env.VsixManifestSourcePath }}
 
     - name: Build
-      run: msbuild /v:m /p:OutDir=\_built
+      run: msbuild /v:m -restore /p:OutDir=\_built
       
     - name: Run tests
       run: dotnet vstest /_built/PkgdefLanguage.Test.dll
