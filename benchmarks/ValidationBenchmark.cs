@@ -1,5 +1,7 @@
 using BenchmarkDotNet.Attributes;
+
 using Microsoft.VSDiagnostics;
+
 using System.Threading.Tasks;
 
 namespace PkgdefLanguage.Benchmarks
@@ -11,6 +13,8 @@ namespace PkgdefLanguage.Benchmarks
         private string[] _documentWithInvalidVariables;
         private string[] _documentWithMixedErrors;
         private string[] _validDocument;
+        private string[] _documentWithValueTypeErrors;
+
         [GlobalSetup]
         public void Setup()
         {
@@ -22,6 +26,8 @@ namespace PkgdefLanguage.Benchmarks
             _documentWithMixedErrors = GenerateDocumentWithMixedErrors(200);
             // Valid document (best case scenario)
             _validDocument = GenerateValidDocument(200);
+            // Document with value type errors (dword, qword, hex)
+            _documentWithValueTypeErrors = GenerateDocumentWithValueTypeErrors(200);
         }
 
         private string[] GenerateDocumentWithDuplicates(int entryCount)
@@ -100,31 +106,65 @@ namespace PkgdefLanguage.Benchmarks
             return lines.ToArray();
         }
 
+        private string[] GenerateDocumentWithValueTypeErrors(int entryCount)
+        {
+            var lines = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < entryCount; i++)
+            {
+                lines.Add($"[HKEY_LOCAL_MACHINE\\Software\\Test\\Key{i}]\r\n");
+
+                if (i % 3 == 0)
+                {
+                    // Invalid dword (too short)
+                    lines.Add($"\"Count\"=dword:7b\r\n");
+                }
+                else if (i % 3 == 1)
+                {
+                    // Invalid qword (invalid characters)
+                    lines.Add($"\"LargeNum\"=qword:GGGGGGGGGGGGGGGG\r\n");
+                }
+                else
+                {
+                    // Invalid hex array (bad format)
+                    lines.Add($"\"Binary\"=hex:0102,03,04\r\n");
+                }
+            }
+
+            return lines.ToArray();
+        }
+
         [Benchmark]
-        public async Task ValidateDocumentWithDuplicates()
+        public async Task ValidateDocumentWithDuplicatesAsync()
         {
             var doc = Document.FromLines(_documentWithDuplicates);
             await doc.WaitForParsingCompleteAsync();
         }
 
         [Benchmark]
-        public async Task ValidateDocumentWithInvalidVariables()
+        public async Task ValidateDocumentWithInvalidVariablesAsync()
         {
             var doc = Document.FromLines(_documentWithInvalidVariables);
             await doc.WaitForParsingCompleteAsync();
         }
 
         [Benchmark]
-        public async Task ValidateDocumentWithMixedErrors()
+        public async Task ValidateDocumentWithMixedErrorsAsync()
         {
             var doc = Document.FromLines(_documentWithMixedErrors);
             await doc.WaitForParsingCompleteAsync();
         }
 
         [Benchmark(Baseline = true)]
-        public async Task ValidateValidDocument()
+        public async Task ValidateValidDocumentAsync()
         {
             var doc = Document.FromLines(_validDocument);
+            await doc.WaitForParsingCompleteAsync();
+        }
+
+        [Benchmark]
+        public async Task ValidateDocumentWithValueTypeErrorsAsync()
+        {
+            var doc = Document.FromLines(_documentWithValueTypeErrors);
             await doc.WaitForParsingCompleteAsync();
         }
     }

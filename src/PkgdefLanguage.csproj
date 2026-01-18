@@ -12,9 +12,9 @@
     <DisableWarning>MSB3277</DisableWarning>
     <DisableWarning>VSTHRD104</DisableWarning>
   </PropertyGroup>
-	<PropertyGroup>
-	<IsTestProject>false</IsTestProject>
-	</PropertyGroup>
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Formatting.cs" />
+    <Compile Include="Editor\CodeFixes.cs" />
     <Compile Include="Editor\DropdownBars.cs" />
     <Compile Include="Options\AdvancedOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -134,5 +135,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-
 </Project>

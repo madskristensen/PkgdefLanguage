@@ -452,15 +452,181 @@ namespace PkgdefLanguage.Test
                                 "@"
                             };
 
-                    var doc = Document.FromLines(lines);
-                    await doc.WaitForParsingCompleteAsync();
-                    var entries = doc.Items.OfType<Entry>().ToList();
+                        var doc = Document.FromLines(lines);
+                        await doc.WaitForParsingCompleteAsync();
+                        var entries = doc.Items.OfType<Entry>().ToList();
 
-                    Assert.HasCount(1, entries);
-                    // The @ should be parsed as a Literal type for colorization
-                    var literalItems = doc.Items.Where(i => i.Type == ItemType.Literal).ToList();
-                    Assert.HasCount(1, literalItems);
-                    Assert.AreEqual("@", literalItems[0].Text.Trim());
-                }
-            }
-        }
+                        Assert.HasCount(1, entries);
+                        // The @ should be parsed as a Literal type for colorization
+                        var literalItems = doc.Items.Where(i => i.Type == ItemType.Literal).ToList();
+                        Assert.HasCount(1, literalItems);
+                        Assert.AreEqual("@", literalItems[0].Text.Trim());
+                    }
+
+                    [TestMethod]
+                    public async Task ValidDWordValue()
+                    {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"Count\"=dword:0000007b"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsTrue(entries[0].Properties[0].Value.IsValid, "Valid dword value should not have errors");
+                        }
+
+                        [TestMethod]
+                        public async Task InvalidDWordValue_TooShort()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"Count\"=dword:7b"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsFalse(entries[0].Properties[0].Value.IsValid, "Short dword value should have error");
+                            Assert.IsTrue(entries[0].Properties[0].Value.Errors.Any(e => e.ErrorCode == "PL009"));
+                        }
+
+                        [TestMethod]
+                        public async Task InvalidDWordValue_InvalidChars()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"Count\"=dword:GGGGGGGG"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsFalse(entries[0].Properties[0].Value.IsValid, "Invalid dword characters should have error");
+                            Assert.IsTrue(entries[0].Properties[0].Value.Errors.Any(e => e.ErrorCode == "PL009"));
+                        }
+
+                        [TestMethod]
+                        public async Task ValidQWordValue()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"LargeNumber\"=qword:00000000ffffffff"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsTrue(entries[0].Properties[0].Value.IsValid, "Valid qword value should not have errors");
+                        }
+
+                        [TestMethod]
+                        public async Task InvalidQWordValue_TooLong()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"LargeNumber\"=qword:00000000ffffffff00"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsFalse(entries[0].Properties[0].Value.IsValid, "Long qword value should have error");
+                            Assert.IsTrue(entries[0].Properties[0].Value.Errors.Any(e => e.ErrorCode == "PL010"));
+                        }
+
+                        [TestMethod]
+                        public async Task ValidHexArrayValue()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"Binary\"=hex:01,02,03,04,ff"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsTrue(entries[0].Properties[0].Value.IsValid, "Valid hex array should not have errors");
+                        }
+
+                        [TestMethod]
+                        public async Task ValidHexWithTypeValue()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"String\"=hex(2):48,00,65,00,6c,00,6c,00,6f,00"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsTrue(entries[0].Properties[0].Value.IsValid, "Valid hex(2) value should not have errors");
+                        }
+
+                        [TestMethod]
+                        public async Task InvalidHexArrayValue_BadFormat()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"Binary\"=hex:0102,03,04"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                            Assert.HasCount(1, entries);
+                            Assert.IsFalse(entries[0].Properties[0].Value.IsValid, "Malformed hex array should have error");
+                            Assert.IsTrue(entries[0].Properties[0].Value.Errors.Any(e => e.ErrorCode == "PL011"));
+                        }
+
+                        [TestMethod]
+                        public async Task InvalidHexArrayValue_InvalidChars()
+                        {
+                            var lines = new[] {
+                                        "[test]\r\n",
+                                        "\"Binary\"=hex:GG,02,03"
+                                    };
+
+                            var doc = Document.FromLines(lines);
+                            await doc.WaitForParsingCompleteAsync();
+                            var entries = doc.Items.OfType<Entry>().ToList();
+
+                                                    Assert.HasCount(1, entries);
+                                                    Assert.IsFalse(entries[0].Properties[0].Value.IsValid, "Invalid hex characters should have error");
+                                                    Assert.IsTrue(entries[0].Properties[0].Value.Errors.Any(e => e.ErrorCode == "PL011"));
+                                                }
+
+                                                [TestMethod]
+                                                public async Task ForwardSlashInRegistryKey()
+                                                {
+                                                    var lines = new[] {
+                                                                "[HKEY_LOCAL_MACHINE/Software/MyApp]\r\n",
+                                                                "@=\"value\""
+                                                            };
+
+                                                    var doc = Document.FromLines(lines);
+                                                    await doc.WaitForParsingCompleteAsync();
+                                                    var entries = doc.Items.OfType<Entry>().ToList();
+
+                                                    Assert.HasCount(1, entries);
+                                                    Assert.IsFalse(entries[0].RegistryKey.IsValid, "Registry key with forward slashes should have error");
+                                                    Assert.IsTrue(entries[0].RegistryKey.Errors.Any(e => e.ErrorCode == "PL003"));
+                                                }
+                                            }
+                                        }
