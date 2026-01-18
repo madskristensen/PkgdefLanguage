@@ -51,6 +51,10 @@ namespace PkgdefLanguage
             {
                 items = GetRegistryKeyCompletion(item, triggerLocation);
             }
+            else if (IsPropertyValuePosition(document, triggerLocation))
+            {
+                items = GetRegistryPropertyValueCompletion(document, triggerLocation);
+            }
             else if (item?.Type == ItemType.String || item?.Type == ItemType.Literal || IsPropertyNamePosition(document, triggerLocation))
             {
                 items = GetRegistryValueCompletion(document, triggerLocation);
@@ -144,6 +148,32 @@ namespace PkgdefLanguage
                             return currentEntry != null;
                         }
 
+                        private bool IsPropertyValuePosition(Document document, SnapshotPoint triggerLocation)
+                        {
+                            ITextSnapshotLine line = triggerLocation.GetContainingLine();
+                            string lineText = line.GetText();
+                            int positionInLine = triggerLocation.Position - line.Start.Position;
+
+                            // Check if we're after the = sign (property value side)
+                            int equalsIndex = lineText.IndexOf('=');
+                            if (equalsIndex == -1 || positionInLine < equalsIndex)
+                            {
+                                return false; // No = sign or we're on the left side
+                            }
+
+                            string trimmedLineText = lineText.TrimStart();
+
+                            // Make sure the line looks like a property (starts with @ or ")
+                            if (!trimmedLineText.StartsWith("@") && !trimmedLineText.StartsWith("\""))
+                            {
+                                return false;
+                            }
+
+                            // Make sure we have a registry key above us
+                            Entry currentEntry = FindCurrentEntry(document, triggerLocation);
+                            return currentEntry != null;
+                        }
+
                         private Entry FindCurrentEntry(Document document, SnapshotPoint triggerLocation)
                         {
                             // Find the most recent entry (registry key section) before this position
@@ -152,6 +182,335 @@ namespace PkgdefLanguage
                                 .Where(e => e.RegistryKey.Span.Start < triggerLocation.Position)
                                 .OrderByDescending(e => e.RegistryKey.Span.Start)
                                 .FirstOrDefault();
+                        }
+
+                        private IEnumerable<CompletionItem> GetRegistryPropertyValueCompletion(Document document, SnapshotPoint triggerLocation)
+                        {
+                            Entry currentEntry = FindCurrentEntry(document, triggerLocation);
+                            if (currentEntry?.RegistryKey == null)
+                            {
+                                return null;
+                            }
+
+                            // Get the property name for the current line
+                            ITextSnapshotLine line = triggerLocation.GetContainingLine();
+                            string lineText = line.GetText();
+                            string propertyName = ExtractPropertyName(lineText);
+
+                            if (string.IsNullOrEmpty(propertyName))
+                            {
+                                return null;
+                            }
+
+                            // Extract the registry key path from the current entry
+                            string keyPath = ExtractRegistryKeyPath(currentEntry.RegistryKey.Text);
+                            if (string.IsNullOrEmpty(keyPath))
+                            {
+                                return null;
+                            }
+
+                            // Get the parent key path (everything except the last segment)
+                            int lastBackslash = keyPath.LastIndexOf('\\');
+                            if (lastBackslash == -1)
+                            {
+                                return null; // No parent key
+                            }
+
+                            string parentKeyPath = keyPath.Substring(0, lastBackslash);
+
+                            // Determine value type from current line or from existing values
+                            string currentValue = ExtractPropertyValue(lineText);
+                            bool isStringValue = currentValue != null && currentValue.Trim().StartsWith("\"");
+
+                            var completionItems = new List<CompletionItem>();
+
+                            // For string values, just suggest empty quotes
+                            if (isStringValue || propertyName == "@")
+                            {
+                                completionItems.Add(new CompletionItem(
+                                    displayText: "\"\"",
+                                    source: this,
+                                    icon: _propertyIcon,
+                                    filters: ImmutableArray<CompletionFilter>.Empty,
+                                    suffix: string.Empty,
+                                    insertText: "\"\"",
+                                    sortText: "\"\"",
+                                    filterText: "\"\"",
+                                    attributeIcons: ImmutableArray<ImageElement>.Empty));
+                            }
+                            else
+                            {
+                                // Collect values from sibling keys for the same property
+                                var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                                try
+                                {
+                                    RegistryKey root = VSRegistry.RegistryRoot(__VsLocalRegistryType.RegType_Configuration);
+                                    RegistryKey parentKey = OpenRegistryKeyPath(root, parentKeyPath);
+
+                                    if (parentKey != null)
+                                    {
+                                        try
+                                        {
+                                            // Get all subkeys (siblings)
+                                            string[] subKeyNames = parentKey.GetSubKeyNames();
+                                            if (subKeyNames != null)
+                                            {
+                                                foreach (string subKeyName in subKeyNames)
+                                                {
+                                                    using (RegistryKey siblingKey = parentKey.OpenSubKey(subKeyName))
+                                                    {
+                                                        if (siblingKey != null)
+                                                        {
+                                                            // Get the value for this property name
+                                                            object value = null;
+
+                                                            if (propertyName == "@")
+                                                            {
+                                                                value = siblingKey.GetValue("");
+                                                            }
+                                                            else
+                                                            {
+                                                                value = siblingKey.GetValue(propertyName);
+                                                            }
+
+                                                            if (value != null)
+                                                            {
+                                                                string valueStr = FormatRegistryValue(siblingKey, propertyName, value);
+                                                                if (!string.IsNullOrEmpty(valueStr))
+                                                                {
+                                                                    values.Add(valueStr);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        finally
+                                        {
+                                            if (parentKey != root)
+                                            {
+                                                parentKey.Dispose();
+                                            }
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    // If we can't access the registry, continue with GUID detection
+                                }
+
+                                // Add values from sibling keys
+                                foreach (var value in values.OrderBy(v => v))
+                                {
+                                    string displayText = value;
+                                    string insertText = value;
+
+                                    // If it's a GUID, display without quotes but insert with quotes
+                                    if (ContainsGuid(value))
+                                    {
+                                        displayText = value;
+                                        insertText = $"\"{value}\"";
+                                    }
+                                    // If it's already quoted (string value), remove quotes for display
+                                    else if (value.StartsWith("\"") && value.EndsWith("\"") && value.Length > 2)
+                                    {
+                                        displayText = value.Substring(1, value.Length - 2);
+                                        insertText = value; // Keep quotes for insertion
+                                    }
+
+                                    completionItems.Add(new CompletionItem(
+                                        displayText: displayText,
+                                        source: this,
+                                        icon: _propertyIcon,
+                                        filters: ImmutableArray<CompletionFilter>.Empty,
+                                        suffix: string.Empty,
+                                        insertText: insertText,
+                                        sortText: displayText,
+                                        filterText: displayText,
+                                        attributeIcons: ImmutableArray<ImageElement>.Empty));
+                                }
+
+                                // Check if any values contain GUIDs, and if so, gather all GUIDs from document
+                                bool hasGuids = values.Any(v => ContainsGuid(v));
+                                if (hasGuids || ContainsGuid(currentValue))
+                                {
+                                    var guids = GatherGuidsFromDocument(document);
+                                    foreach (var guid in guids)
+                                    {
+                                        // Check if this GUID is already in values (may be without quotes)
+                                        bool alreadyAdded = values.Contains(guid) || values.Contains($"\"{guid}\"");
+
+                                        if (!alreadyAdded)
+                                        {
+                                            // Display without quotes, insert with quotes
+                                            completionItems.Add(new CompletionItem(
+                                                displayText: guid,
+                                                source: this,
+                                                icon: _propertyIcon,
+                                                filters: ImmutableArray<CompletionFilter>.Empty,
+                                                suffix: string.Empty,
+                                                insertText: $"\"{guid}\"",
+                                                sortText: guid,
+                                                filterText: guid,
+                                                attributeIcons: ImmutableArray<ImageElement>.Empty));
+                                        }
+                                    }
+                                }
+                            }
+
+                            return completionItems.Count > 0 ? completionItems : null;
+                        }
+
+                        private string ExtractPropertyName(string lineText)
+                        {
+                            int equalsIndex = lineText.IndexOf('=');
+                            if (equalsIndex == -1)
+                            {
+                                return null;
+                            }
+
+                            string leftSide = lineText.Substring(0, equalsIndex).Trim();
+
+                            if (leftSide == "@")
+                            {
+                                return "@";
+                            }
+
+                            // Remove quotes if present
+                            if (leftSide.StartsWith("\"") && leftSide.EndsWith("\"") && leftSide.Length > 1)
+                            {
+                                return leftSide.Substring(1, leftSide.Length - 2);
+                            }
+
+                            return leftSide;
+                        }
+
+                        private string ExtractPropertyValue(string lineText)
+                        {
+                            int equalsIndex = lineText.IndexOf('=');
+                            if (equalsIndex == -1)
+                            {
+                                return null;
+                            }
+
+                            return lineText.Substring(equalsIndex + 1).Trim();
+                        }
+
+                        private string FormatRegistryValue(RegistryKey key, string propertyName, object value)
+                        {
+                            if (value == null)
+                            {
+                                return null;
+                            }
+
+                            var valueKind = key.GetValueKind(propertyName == "@" ? "" : propertyName);
+
+                            switch (valueKind)
+                            {
+                                case RegistryValueKind.DWord:
+                                    return $"dword:{Convert.ToUInt32(value):x8}";
+
+                                case RegistryValueKind.QWord:
+                                    return $"qword:{Convert.ToUInt64(value):x16}";
+
+                                case RegistryValueKind.Binary:
+                                    byte[] bytes = value as byte[];
+                                    if (bytes != null && bytes.Length > 0)
+                                    {
+                                        return "hex:" + string.Join(",", bytes.Select(b => b.ToString("x2")));
+                                    }
+                                    break;
+
+                                case RegistryValueKind.String:
+                                case RegistryValueKind.ExpandString:
+                                    string strValue = value.ToString();
+                                    // If it's a GUID, return without quotes (they'll be added in display)
+                                    if (ContainsGuid(strValue))
+                                    {
+                                        return strValue;
+                                    }
+                                    return $"\"{strValue}\"";
+                            }
+
+                            return value.ToString();
+                        }
+
+                        private bool ContainsGuid(string text)
+                        {
+                            if (string.IsNullOrEmpty(text))
+                            {
+                                return false;
+                            }
+
+                            // Simple GUID pattern check: {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
+                            return System.Text.RegularExpressions.Regex.IsMatch(text, 
+                                @"\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}");
+                        }
+
+                        private IEnumerable<string> GatherGuidsFromDocument(Document document)
+                        {
+                            var guids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            var guidPattern = new System.Text.RegularExpressions.Regex(
+                                @"\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}");
+
+                            foreach (var item in document.Items)
+                            {
+                                // Search in the item's text
+                                if (item.Text != null)
+                                {
+                                    var matches = guidPattern.Matches(item.Text);
+                                    foreach (System.Text.RegularExpressions.Match match in matches)
+                                    {
+                                        guids.Add(match.Value);
+                                    }
+                                }
+
+                                // If it's an Entry, also search in its RegistryKey
+                                if (item is Entry entry && entry.RegistryKey?.Text != null)
+                                {
+                                    var matches = guidPattern.Matches(entry.RegistryKey.Text);
+                                    foreach (System.Text.RegularExpressions.Match match in matches)
+                                    {
+                                        guids.Add(match.Value);
+                                    }
+                                }
+
+                                // Search in children (like References)
+                                if (item.Children != null)
+                                {
+                                    foreach (var child in item.Children)
+                                    {
+                                        if (child.Text != null)
+                                        {
+                                            var matches = guidPattern.Matches(child.Text);
+                                            foreach (System.Text.RegularExpressions.Match match in matches)
+                                            {
+                                                guids.Add(match.Value);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Search in references (like variable references within items)
+                                if (item.References != null)
+                                {
+                                    foreach (var reference in item.References)
+                                    {
+                                        if (reference.Text != null)
+                                        {
+                                            var matches = guidPattern.Matches(reference.Text);
+                                            foreach (System.Text.RegularExpressions.Match match in matches)
+                                            {
+                                                guids.Add(match.Value);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            return guids.OrderBy(g => g);
                         }
 
                         private IEnumerable<CompletionItem> GetRegistryValueCompletion(Document document, SnapshotPoint triggerLocation)
@@ -364,7 +723,7 @@ namespace PkgdefLanguage
 
         public CompletionStartData InitializeCompletion(CompletionTrigger trigger, SnapshotPoint triggerLocation, CancellationToken token)
         {
-            if (trigger.Character == '\n' || trigger.Character == ']' || trigger.Reason == CompletionTriggerReason.Deletion)
+            if (trigger.Character == '\n' || trigger.Character == ']' || (trigger.Reason == CompletionTriggerReason.Deletion && trigger.Character != '='))
             {
                 return CompletionStartData.DoesNotParticipateInCompletion;
             }
@@ -401,6 +760,29 @@ namespace PkgdefLanguage
                         var span = new SnapshotSpan(triggerLocation.Snapshot, item.Span.Start + start, end - start);
                         return new CompletionStartData(CompletionParticipation.ProvidesItems, span);
                     }
+                }
+            }
+            else if (IsPropertyValuePosition(document, triggerLocation))
+            {
+                // Handle property value completion (right side of =)
+                ITextSnapshotLine line = triggerLocation.GetContainingLine();
+                string lineText = line.GetText();
+                int lineStartOffset = line.Start.Position;
+                int positionInLine = triggerLocation.Position - lineStartOffset;
+
+                int equalsIndex = lineText.IndexOf('=');
+                if (equalsIndex > -1)
+                {
+                    // Start from after the = and any whitespace
+                    int start = equalsIndex + 1;
+                    while (start < lineText.Length && char.IsWhiteSpace(lineText[start]))
+                    {
+                        start++;
+                    }
+
+                    // Use a zero-length span at the start position to trigger completion
+                    var span = new SnapshotSpan(triggerLocation.Snapshot, lineStartOffset + start, 0);
+                    return new CompletionStartData(CompletionParticipation.ProvidesItems, span);
                 }
             }
             else if (item?.Type == ItemType.String || item?.Type == ItemType.Literal || IsPropertyNamePosition(document, triggerLocation))
