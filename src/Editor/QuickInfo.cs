@@ -37,53 +37,53 @@ namespace PkgdefLanguage
 
         public QuickInfoSource(ITextBuffer textBuffer)
         {
-            _textBuffer = textBuffer;
-        }
-
-        public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken)
-        {
-            SnapshotPoint? triggerPoint = session.GetTriggerPoint(_textBuffer.CurrentSnapshot);
-
-            if (!triggerPoint.HasValue)
-            {
-                return Task.FromResult<QuickInfoItem>(null);
+                _textBuffer = textBuffer;
             }
 
-            Document document = _textBuffer.GetDocument();
-            if (document == null)
+            public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken)
             {
-                return Task.FromResult<QuickInfoItem>(null);
-            }
+                SnapshotPoint? triggerPoint = session.GetTriggerPoint(_textBuffer.CurrentSnapshot);
 
-                        ParseItem item = document.FindItemFromPosition(triggerPoint.Value.Position);
+                if (!triggerPoint.HasValue)
+                {
+                    return Task.FromResult<QuickInfoItem>(null);
+                }
 
-                        if (item == null)
-                        {
-                            return Task.FromResult<QuickInfoItem>(null);
-                        }
+                Document document = _textBuffer.GetDocument();
+                if (document == null)
+                {
+                    return Task.FromResult<QuickInfoItem>(null);
+                }
 
-                        // Handle variable references first (highest priority)
-                        if (item.Type == ItemType.Reference)
-                        {
-                            QuickInfoItem variableQuickInfo = CreateVariableQuickInfo(item, triggerPoint.Value);
-                            if (variableQuickInfo != null)
-                            {
-                                return Task.FromResult(variableQuickInfo);
-                            }
-                        }
+                ParseItem item = document.FindItemFromPosition(triggerPoint.Value.Position);
 
-                        // Handle validation errors
-                        if (item.Errors.Count > 0)
-                        {
-                            QuickInfoItem errorQuickInfo = CreateErrorQuickInfo(item, triggerPoint.Value);
-                            if (errorQuickInfo != null)
-                            {
-                                return Task.FromResult(errorQuickInfo);
-                            }
-                        }
+                if (item == null)
+                {
+                    return Task.FromResult<QuickInfoItem>(null);
+                }
 
-                        return Task.FromResult<QuickInfoItem>(null);
+                // Handle variable references - show both errors AND variable info if applicable
+                if (item.Type == ItemType.Reference)
+                {
+                    QuickInfoItem referenceQuickInfo = CreateReferenceQuickInfo(item, triggerPoint.Value);
+                    if (referenceQuickInfo != null)
+                    {
+                        return Task.FromResult(referenceQuickInfo);
                     }
+                }
+
+                // Handle validation errors for non-reference items
+                if (item.Errors.Count > 0)
+                {
+                    QuickInfoItem errorQuickInfo = CreateErrorQuickInfo(item, triggerPoint.Value);
+                    if (errorQuickInfo != null)
+                    {
+                        return Task.FromResult(errorQuickInfo);
+                    }
+                }
+
+                return Task.FromResult<QuickInfoItem>(null);
+            }
 
         private QuickInfoItem CreateErrorQuickInfo(ParseItem item, SnapshotPoint triggerPoint)
         {
@@ -92,19 +92,6 @@ namespace PkgdefLanguage
                 return null;
             }
 
-            // Get the most severe error to determine the icon
-            var mostSevereError = item.Errors
-                .OrderBy(e => e.Severity)
-                .First();
-
-            ImageId icon = mostSevereError.Severity switch
-            {
-                __VSERRORCATEGORY.EC_ERROR => _errorIcon,
-                __VSERRORCATEGORY.EC_WARNING => _warningIcon,
-                _ => _infoIcon
-            };
-
-            // Build the error message(s)
             var textRuns = new List<ClassifiedTextRun>();
 
             for (int i = 0; i < item.Errors.Count; i++)
@@ -113,28 +100,29 @@ namespace PkgdefLanguage
 
                 if (i > 0)
                 {
-                    textRuns.Add(new ClassifiedTextRun("text", Environment.NewLine + Environment.NewLine));
+                    textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine));
                 }
 
-                // Error message in plain text (without error code)
-                textRuns.Add(new ClassifiedTextRun("text", error.Message));
+                // Prefix based on severity
+                string prefix = error.Severity switch
+                {
+                    __VSERRORCATEGORY.EC_ERROR => "Error: ",
+                    __VSERRORCATEGORY.EC_WARNING => "Warning: ",
+                    _ => "Info: "
+                };
 
-                // Blank line
-                textRuns.Add(new ClassifiedTextRun("text", Environment.NewLine + Environment.NewLine));
-
-                // Error code on its own line, styled to indicate it's a link
-                textRuns.Add(new ClassifiedTextRun("text", error.ErrorCode, () =>
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, prefix, ClassifiedTextRunStyle.Bold));
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, error.Message));
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine));
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, error.ErrorCode, () =>
                 {
                     Process.Start(new ProcessStartInfo(error.HelpLink) { UseShellExecute = true });
                 }));
             }
 
-            var textElement = new ClassifiedTextElement(textRuns);
-
             var containerElement = new ContainerElement(
-                ContainerElementStyle.Wrapped,
-                new ImageElement(icon),
-                textElement);
+                ContainerElementStyle.Stacked,
+                new ClassifiedTextElement(textRuns));
 
             ITrackingSpan applicableToSpan = triggerPoint.Snapshot.CreateTrackingSpan(item.Span, SpanTrackingMode.EdgeInclusive);
 
@@ -170,6 +158,73 @@ namespace PkgdefLanguage
             }
 
             return null;
+        }
+
+        private QuickInfoItem CreateReferenceQuickInfo(ParseItem item, SnapshotPoint triggerPoint)
+        {
+            // Extract the variable name (remove $)
+            string variableName = item.Text.Trim('$');
+            bool hasVariableInfo = PredefinedVariables.Variables.TryGetValue(variableName, out string description);
+            bool hasErrors = item.Errors.Count > 0;
+
+            if (!hasVariableInfo && !hasErrors)
+            {
+                return null;
+            }
+
+            var textRuns = new List<ClassifiedTextRun>();
+
+            // Add variable information first (if known variable)
+            if (hasVariableInfo)
+            {
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, variableName, ClassifiedTextRunStyle.Bold));
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine));
+                textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, description));
+            }
+
+            // Add error information below (if any)
+            if (hasErrors)
+            {
+                // Add separator if we have variable info above
+                if (hasVariableInfo)
+                {
+                    textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine));
+                }
+
+                for (int i = 0; i < item.Errors.Count; i++)
+                {
+                    var error = item.Errors.ElementAt(i);
+
+                    if (i > 0)
+                    {
+                        textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine));
+                    }
+
+                    // Prefix based on severity
+                    string prefix = error.Severity switch
+                    {
+                        __VSERRORCATEGORY.EC_ERROR => "Error: ",
+                        __VSERRORCATEGORY.EC_WARNING => "Warning: ",
+                        _ => "Info: "
+                    };
+
+                    textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, prefix, ClassifiedTextRunStyle.Bold));
+                    textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, error.Message));
+                    textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, Environment.NewLine + Environment.NewLine));
+                    textRuns.Add(new ClassifiedTextRun(PredefinedClassificationTypeNames.Text, error.ErrorCode, () =>
+                    {
+                        Process.Start(new ProcessStartInfo(error.HelpLink) { UseShellExecute = true });
+                    }));
+                }
+            }
+
+            var containerElement = new ContainerElement(
+                ContainerElementStyle.Stacked,
+                new ClassifiedTextElement(textRuns));
+
+            ITrackingSpan applicableToSpan = triggerPoint.Snapshot.CreateTrackingSpan(item.Span, SpanTrackingMode.EdgeInclusive);
+
+            return new QuickInfoItem(applicableToSpan, containerElement);
         }
 
         public void Dispose()
