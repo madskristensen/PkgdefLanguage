@@ -69,7 +69,8 @@ namespace PkgdefLanguage
                         e.ErrorCode == "PL004" ||
                         e.ErrorCode == "PL005" ||
                         e.ErrorCode == "PL006" ||
-                        e.ErrorCode == "PL007"));
+                        e.ErrorCode == "PL007" ||
+                        e.ErrorCode == "PL008"));
 
                 return Task.FromResult(hasQuickFixes);
             }
@@ -151,12 +152,16 @@ namespace PkgdefLanguage
                                     }
                                     break;
 
-                                case "PL007": // Variable missing closing $
-                                    actions.Add(new AddClosingDollarSignAction(_textView, _textBuffer, itemWithError));
-                                    break;
-                            }
-                        }
-                    }
+                                        case "PL007": // Variable missing closing $
+                                                actions.Add(new AddClosingDollarSignAction(_textView, _textBuffer, itemWithError));
+                                                break;
+
+                                            case "PL008": // Duplicate registry key
+                                                actions.Add(new ConsolidateDuplicateKeysAction(_textView, _textBuffer, itemWithError, document));
+                                                break;
+                                        }
+                                    }
+                                }
 
                     // Return quick fixes first (higher priority)
                     if (actions.Any())
@@ -668,9 +673,109 @@ namespace PkgdefLanguage
                             }
                         }
 
-                            // Refactoring: Add default value @="" to registry key
-                            internal class AddDefaultValueAction : CodeFixAction
+                            // PL008: Consolidate duplicate registry keys
+                            internal class ConsolidateDuplicateKeysAction : CodeFixAction
                             {
+                                private readonly Document _document;
+
+                                public ConsolidateDuplicateKeysAction(ITextView textView, ITextBuffer textBuffer, ParseItem item, Document document)
+                                    : base(textView, textBuffer, item)
+                                {
+                                    _document = document;
+                                }
+
+                                public override string DisplayText => "Consolidate duplicate registry keys";
+
+                                public override void Invoke(CancellationToken cancellationToken)
+                                {
+                                    var duplicateKeyText = _item.Text.Trim();
+
+                                    // Find all Entry items with the same registry key
+                                    var allEntries = _document.Items
+                                        .OfType<Entry>()
+                                        .Where(e => e.RegistryKey.Text.Trim().Equals(duplicateKeyText, StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+
+                                    if (allEntries.Count < 2)
+                                    {
+                                        return;
+                                    }
+
+                                    // The first entry is the one we keep and merge into
+                                    var firstEntry = allEntries[0];
+                                    var duplicateEntries = allEntries.Skip(1).ToList();
+
+                                    // Collect all properties from duplicate entries
+                                    var propertiesToAdd = new List<string>();
+                                    foreach (var entry in duplicateEntries)
+                                    {
+                                        foreach (var property in entry.Properties)
+                                        {
+                                            propertiesToAdd.Add($"{property.Name.Text.Trim()}={property.Value.Text.Trim()}");
+                                        }
+                                    }
+
+                                    // Build the text to insert after the first entry's last property (or registry key if no properties)
+                                    var insertText = new StringBuilder();
+                                    foreach (var prop in propertiesToAdd)
+                                    {
+                                        insertText.AppendLine(prop);
+                                    }
+
+                                    // Apply changes in reverse order to preserve positions
+                                    // First, delete duplicate entries from bottom to top
+                                    var sortedDuplicates = duplicateEntries.OrderByDescending(e => e.Span.Start).ToList();
+
+                                    using (var edit = _textBuffer.CreateEdit())
+                                    {
+                                        // Delete duplicate entries
+                                        foreach (var entry in sortedDuplicates)
+                                        {
+                                            // Include any trailing newlines in the deletion
+                                            var deleteStart = entry.Span.Start;
+                                            var deleteEnd = entry.Span.End;
+
+                                            // Extend to include the leading newline if there is one
+                                            var snapshot = _textBuffer.CurrentSnapshot;
+                                            if (deleteStart > 0)
+                                            {
+                                                var lineNumber = snapshot.GetLineNumberFromPosition(deleteStart);
+                                                var line = snapshot.GetLineFromLineNumber(lineNumber);
+                                                deleteStart = line.Start.Position;
+                                            }
+
+                                            // Extend to include trailing newlines
+                                            while (deleteEnd < snapshot.Length)
+                                            {
+                                                char c = snapshot.GetText(deleteEnd, 1)[0];
+                                                if (c == '\r' || c == '\n')
+                                                {
+                                                    deleteEnd++;
+                                                }
+                                                else
+                                                {
+                                                    break;
+                                                }
+                                            }
+
+                                            edit.Delete(deleteStart, deleteEnd - deleteStart);
+                                        }
+
+                                        // Insert consolidated properties after the first entry
+                                        if (propertiesToAdd.Count > 0)
+                                        {
+                                            var insertPosition = firstEntry.Span.End;
+                                            edit.Insert(insertPosition, "\r\n" + insertText.ToString().TrimEnd());
+                                        }
+
+                                        edit.Apply();
+                                    }
+                                }
+                            }
+
+                                // Refactoring: Add default value @="" to registry key
+                                internal class AddDefaultValueAction : CodeFixAction
+                                {
                                 private readonly Entry _entry;
 
                                 public AddDefaultValueAction(ITextView textView, ITextBuffer textBuffer, Entry entry)
