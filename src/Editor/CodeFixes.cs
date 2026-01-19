@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,102 +32,156 @@ namespace PkgdefLanguage
 
         public CodeFixSource(ITextView textView, ITextBuffer textBuffer)
         {
-            _textView = textView;
-            _textBuffer = textBuffer;
-        }
-
-        public event EventHandler<EventArgs> SuggestedActionsChanged { add { } remove { } }
-
-        public Task<bool> HasSuggestedActionsAsync(ISuggestedActionCategorySet requestedActionCategories, SnapshotSpan range, CancellationToken cancellationToken)
-        {
-            Document document = _textBuffer.GetDocument();
-            if (document == null)
-            {
-                return Task.FromResult(false);
+                _textView = textView;
+                _textBuffer = textBuffer;
             }
 
-            // Find all items with errors at this range (not just a position)
-            var itemsWithErrors = FindAllItemsWithErrorsInRange(document, range.Start.Position, range.End.Position);
+            public event EventHandler<EventArgs> SuggestedActionsChanged { add { } remove { } }
 
-            if (!itemsWithErrors.Any())
+            public Task<bool> HasSuggestedActionsAsync(ISuggestedActionCategorySet requestedActionCategories, SnapshotSpan range, CancellationToken cancellationToken)
             {
-                return Task.FromResult(false);
-            }
-
-            // Check if any of the errors have quick fixes available
-            bool hasQuickFixes = itemsWithErrors.Any(item =>
-                item.Errors.Any(e =>
-                    e.ErrorCode == "PL002" ||
-                    e.ErrorCode == "PL003" ||
-                    e.ErrorCode == "PL004" ||
-                    e.ErrorCode == "PL005"));
-
-            return Task.FromResult(hasQuickFixes);
-        }
-
-        public IEnumerable<SuggestedActionSet> GetSuggestedActions(ISuggestedActionCategorySet requestedActionCategories, SnapshotSpan range, CancellationToken cancellationToken)
-        {
-            return GetSuggestedActions(range);
-        }
-
-        private IEnumerable<SuggestedActionSet> GetSuggestedActions(SnapshotSpan range)
-        {
-            Document document = _textBuffer.GetDocument();
-            if (document == null)
-            {
-                yield break;
-            }
-
-            // Find all items with errors in this range (not just at a position)
-            var itemsWithErrors = FindAllItemsWithErrorsInRange(document, range.Start.Position, range.End.Position);
-
-            if (!itemsWithErrors.Any())
-            {
-                yield break;
-            }
-
-            var actions = new List<ISuggestedAction>();
-
-            // Collect quick fixes from all items with errors at this position
-            foreach (var itemWithError in itemsWithErrors)
-            {
-                foreach (Error error in itemWithError.Errors)
+                Document document = _textBuffer.GetDocument();
+                if (document == null)
                 {
-                    switch (error.ErrorCode)
+                    return Task.FromResult(false);
+                }
+
+                // Check for refactoring actions on registry keys
+                Entry entryAtPosition = FindEntryAtPosition(document, range.Start.Position);
+                if (entryAtPosition != null)
+                {
+                    return Task.FromResult(true);
+                }
+
+                // Find all items with errors at this range (not just a position)
+                var itemsWithErrors = FindAllItemsWithErrorsInRange(document, range.Start.Position, range.End.Position);
+
+                if (!itemsWithErrors.Any())
+                {
+                    return Task.FromResult(false);
+                }
+
+                // Check if any of the errors have quick fixes available
+                bool hasQuickFixes = itemsWithErrors.Any(item =>
+                    item.Errors.Any(e =>
+                        e.ErrorCode == "PL002" ||
+                        e.ErrorCode == "PL003" ||
+                        e.ErrorCode == "PL004" ||
+                        e.ErrorCode == "PL005" ||
+                        e.ErrorCode == "PL006" ||
+                        e.ErrorCode == "PL007"));
+
+                return Task.FromResult(hasQuickFixes);
+            }
+
+            public IEnumerable<SuggestedActionSet> GetSuggestedActions(ISuggestedActionCategorySet requestedActionCategories, SnapshotSpan range, CancellationToken cancellationToken)
+            {
+                return GetSuggestedActions(range);
+            }
+
+            private IEnumerable<SuggestedActionSet> GetSuggestedActions(SnapshotSpan range)
+            {
+                Document document = _textBuffer.GetDocument();
+                        if (document == null)
+                        {
+                            yield break;
+                    }
+
+                    var actions = new List<ISuggestedAction>();
+                    var refactoringActions = new List<ISuggestedAction>();
+
+                    // Check for refactoring actions on registry keys
+                    Entry entryAtPosition = FindEntryAtPosition(document, range.Start.Position);
+                    if (entryAtPosition != null)
                     {
-                        case "PL002": // Unclosed registry key
-                            actions.Add(new AddClosingBracketAction(_textView, _textBuffer, itemWithError));
-                            break;
+                        // Add default value action (only if no @ property exists)
+                        bool hasDefaultValue = entryAtPosition.Properties.Any(p => p.Name.Text.Trim() == "@");
+                        if (!hasDefaultValue)
+                        {
+                            refactoringActions.Add(new AddDefaultValueAction(_textView, _textBuffer, entryAtPosition));
+                        }
 
-                        case "PL003": // Forward slash in registry path
-                            actions.Add(new ReplaceForwardSlashAction(_textView, _textBuffer, itemWithError));
-                            break;
+                        // Sort properties action (only if there are 2+ properties)
+                        if (entryAtPosition.Properties.Count >= 2)
+                        {
+                            refactoringActions.Add(new SortPropertiesAction(_textView, _textBuffer, entryAtPosition));
+                        }
+                    }
 
-                        case "PL004": // Quoted @ sign
-                            actions.Add(new RemoveQuotesFromAtSignAction(_textView, _textBuffer, itemWithError));
-                            break;
+                    // Find all items with errors in this range (not just at a position)
+                    var itemsWithErrors = FindAllItemsWithErrorsInRange(document, range.Start.Position, range.End.Position);
 
-                        case "PL005": // Missing quotes on property name OR missing closing quote
-                            if (itemWithError.Type == ItemType.String)
+                    // Collect quick fixes from all items with errors at this position
+                    foreach (var itemWithError in itemsWithErrors)
+                    {
+                        foreach (Error error in itemWithError.Errors)
+                        {
+                            switch (error.ErrorCode)
                             {
-                                // String missing closing quote
-                                actions.Add(new AddClosingQuoteAction(_textView, _textBuffer, itemWithError));
+                                case "PL002": // Unclosed registry key
+                                    actions.Add(new AddClosingBracketAction(_textView, _textBuffer, itemWithError));
+                                    break;
+
+                                case "PL003": // Forward slash in registry path
+                                    actions.Add(new ReplaceForwardSlashAction(_textView, _textBuffer, itemWithError));
+                                    break;
+
+                                case "PL004": // Quoted @ sign
+                                    actions.Add(new RemoveQuotesFromAtSignAction(_textView, _textBuffer, itemWithError));
+                                    break;
+
+                                case "PL005": // Missing quotes on property name OR missing closing quote
+                                    if (itemWithError.Type == ItemType.String)
+                                    {
+                                        // String missing closing quote
+                                        actions.Add(new AddClosingQuoteAction(_textView, _textBuffer, itemWithError));
+                                    }
+                                    else
+                                    {
+                                        // Unquoted property name
+                                        actions.Add(new SurroundWithQuotesAction(_textView, _textBuffer, itemWithError));
+                                    }
+                                    break;
+
+                                case "PL006": // Unknown variable - suggest similar
+                                    var suggestAction = new SuggestSimilarVariableAction(_textView, _textBuffer, itemWithError);
+                                    if (suggestAction.HasSuggestion)
+                                    {
+                                        actions.Add(suggestAction);
+                                    }
+                                    break;
+
+                                case "PL007": // Variable missing closing $
+                                    actions.Add(new AddClosingDollarSignAction(_textView, _textBuffer, itemWithError));
+                                    break;
                             }
-                            else
-                            {
-                                // Unquoted property name
-                                actions.Add(new SurroundWithQuotesAction(_textView, _textBuffer, itemWithError));
-                            }
-                            break;
+                        }
+                    }
+
+                    // Return quick fixes first (higher priority)
+                    if (actions.Any())
+                    {
+                        yield return new SuggestedActionSet(null, actions, null, SuggestedActionSetPriority.Medium);
+                    }
+
+                    // Return refactoring actions (lower priority)
+                    if (refactoringActions.Any())
+                    {
+                        yield return new SuggestedActionSet("Refactoring", refactoringActions, null, SuggestedActionSetPriority.Low);
                     }
                 }
-            }
 
-            if (actions.Any())
-            {
-                yield return new SuggestedActionSet(null, actions, null, SuggestedActionSetPriority.Medium);
-            }
-        }
+                private Entry FindEntryAtPosition(Document document, int position)
+                {
+                    foreach (var item in document.Items)
+                    {
+                        if (item is Entry entry && entry.Span.Contains(position))
+                        {
+                            return entry;
+                        }
+                    }
+                    return null;
+                }
 
         private List<ParseItem> FindAllItemsWithErrorsInRange(Document document, int rangeStart, int rangeEnd)
         {
@@ -148,6 +203,22 @@ namespace PkgdefLanguage
                         if (addedSpans.Add(spanKey))
                         {
                             itemsWithErrors.Add(entry.RegistryKey);
+                        }
+                    }
+
+                    // Check references within registry key (e.g., $RootKey$ in [$RootKey\Path])
+                    if (entry.RegistryKey != null && entry.RegistryKey.References.Any())
+                    {
+                        foreach (var reference in entry.RegistryKey.References)
+                        {
+                            if (reference.Errors.Any() && RangeOverlapsSpan(rangeStart, rangeEnd, reference.Span))
+                            {
+                                var spanKey = (reference.Span.Start, reference.Span.Length);
+                                if (addedSpans.Add(spanKey))
+                                {
+                                    itemsWithErrors.Add(reference);
+                                }
+                            }
                         }
                     }
 
@@ -426,7 +497,210 @@ namespace PkgdefLanguage
                         insertPosition = _item.Span.Start + trimmedEnd.Length;
                     }
 
-                    _textBuffer.Insert(insertPosition, "\"");
-                }
-            }
-        }
+                                        _textBuffer.Insert(insertPosition, "\"");
+                                    }
+                                }
+
+                        // PL006: Suggest similar variable name
+                        internal class SuggestSimilarVariableAction : CodeFixAction
+                        {
+                            private readonly string _suggestion;
+
+                            public SuggestSimilarVariableAction(ITextView textView, ITextBuffer textBuffer, ParseItem item)
+                                : base(textView, textBuffer, item)
+                            {
+                                _suggestion = FindSimilarVariable(item.Text.Trim().Trim('$'));
+                            }
+
+                            public bool HasSuggestion => !string.IsNullOrEmpty(_suggestion);
+
+                            public override string DisplayText => $"Change to ${_suggestion}$";
+
+                            public override void Invoke(CancellationToken cancellationToken)
+                            {
+                                if (string.IsNullOrEmpty(_suggestion))
+                                {
+                                    return;
+                                }
+
+                                var span = new Span(_item.Span.Start, _item.Span.Length);
+                                _textBuffer.Replace(span, $"${_suggestion}$");
+                            }
+
+                            private static string FindSimilarVariable(string input)
+                            {
+                                if (string.IsNullOrEmpty(input))
+                                {
+                                    return null;
+                                }
+
+                                string bestMatch = null;
+                                int bestDistance = int.MaxValue;
+                                var inputLower = input.ToLowerInvariant();
+
+                                foreach (var variable in PredefinedVariables.Variables.Keys)
+                                {
+                                    var variableLower = variable.ToLowerInvariant();
+
+                                    // Check for substring match first (e.g., "Root" matches "RootFolder")
+                                    if (variableLower.Contains(inputLower) || inputLower.Contains(variableLower))
+                                    {
+                                        return variable;
+                                    }
+
+                                    // Calculate Levenshtein distance for fuzzy matching
+                                    int distance = LevenshteinDistance(inputLower, variableLower);
+                                    if (distance < bestDistance && distance <= Math.Max(input.Length, variable.Length) / 2)
+                                    {
+                                        bestDistance = distance;
+                                        bestMatch = variable;
+                                    }
+                                }
+
+                                return bestMatch;
+                            }
+
+                            private static int LevenshteinDistance(string s1, string s2)
+                            {
+                                int[,] d = new int[s1.Length + 1, s2.Length + 1];
+
+                                for (int i = 0; i <= s1.Length; i++)
+                                {
+                                    d[i, 0] = i;
+                                }
+
+                                for (int j = 0; j <= s2.Length; j++)
+                                {
+                                    d[0, j] = j;
+                                }
+
+                                for (int i = 1; i <= s1.Length; i++)
+                                {
+                                    for (int j = 1; j <= s2.Length; j++)
+                                    {
+                                        int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+                                        d[i, j] = Math.Min(
+                                            Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                                            d[i - 1, j - 1] + cost);
+                                    }
+                                }
+
+                                return d[s1.Length, s2.Length];
+                            }
+                        }
+
+                        // PL007: Add missing closing $ to variable
+                        internal class AddClosingDollarSignAction : CodeFixAction
+                        {
+                            public AddClosingDollarSignAction(ITextView textView, ITextBuffer textBuffer, ParseItem item)
+                                : base(textView, textBuffer, item)
+                            {
+                            }
+
+                            public override string DisplayText => "Add closing $";
+
+                            public override void Invoke(CancellationToken cancellationToken)
+                            {
+                                var text = _item.Text.TrimEnd();
+
+                                if (!text.EndsWith("$"))
+                                {
+                                    var endPosition = _item.Span.Start + text.Length;
+                                    _textBuffer.Insert(endPosition, "$");
+                                }
+                            }
+                        }
+
+                        // Refactoring: Sort properties alphabetically with @ at top
+                        internal class SortPropertiesAction : CodeFixAction
+                        {
+                            private readonly Entry _entry;
+
+                            public SortPropertiesAction(ITextView textView, ITextBuffer textBuffer, Entry entry)
+                                : base(textView, textBuffer, entry.RegistryKey)
+                            {
+                                _entry = entry;
+                            }
+
+                            public override string DisplayText => "Sort properties (@ first, then alphabetically)";
+
+                            public override void Invoke(CancellationToken cancellationToken)
+                            {
+                                if (_entry.Properties.Count < 2)
+                                {
+                                    return;
+                                }
+
+                                // Sort properties: @ first, then alphabetically by name
+                                var sortedProperties = _entry.Properties
+                                    .OrderBy(p => p.Name.Text.Trim() == "@" ? 0 : 1)
+                                    .ThenBy(p => p.Name.Text.Trim(), StringComparer.OrdinalIgnoreCase)
+                                    .ToList();
+
+                                // Check if already sorted
+                                bool alreadySorted = true;
+                                for (int i = 0; i < _entry.Properties.Count; i++)
+                                {
+                                    if (_entry.Properties[i] != sortedProperties[i])
+                                    {
+                                        alreadySorted = false;
+                                        break;
+                                    }
+                                }
+
+                                if (alreadySorted)
+                                {
+                                    return;
+                                }
+
+                                // Build the new text for the entry
+                                var sb = new System.Text.StringBuilder();
+                                sb.AppendLine(_entry.RegistryKey.Text.Trim());
+
+                                foreach (var property in sortedProperties)
+                                {
+                                    sb.AppendLine($"{property.Name.Text.Trim()}={property.Value.Text.Trim()}");
+                                }
+
+                                // Replace the entire entry span
+                                var span = new Span(_entry.Span.Start, _entry.Span.Length);
+                                _textBuffer.Replace(span, sb.ToString().TrimEnd());
+                            }
+                        }
+
+                            // Refactoring: Add default value @="" to registry key
+                            internal class AddDefaultValueAction : CodeFixAction
+                            {
+                                private readonly Entry _entry;
+
+                                public AddDefaultValueAction(ITextView textView, ITextBuffer textBuffer, Entry entry)
+                                    : base(textView, textBuffer, entry.RegistryKey)
+                                {
+                                    _entry = entry;
+                                }
+
+                                public override string DisplayText => "Add default value @=\"\"";
+
+                                public override void Invoke(CancellationToken cancellationToken)
+                                {
+                                    // Check if @ already exists
+                                    bool hasDefaultValue = _entry.Properties.Any(p => p.Name.Text.Trim() == "@");
+                                    if (hasDefaultValue)
+                                    {
+                                        return;
+                                    }
+
+                                    // Find the end of the registry key line (before any trailing newline)
+                                    var keyText = _entry.RegistryKey.Text;
+                                    var trimmedKeyText = keyText.TrimEnd('\r', '\n');
+                                    var insertPosition = _entry.RegistryKey.Span.Start + trimmedKeyText.Length;
+
+                                    // Always add newline before @="" and after it to push existing content down
+                                    var textToInsert = _entry.Properties.Any() 
+                                        ? "\r\n@=\"\"" 
+                                        : "\r\n@=\"\"\r\n";
+
+                                    _textBuffer.Insert(insertPosition, textToInsert);
+                                }
+                            }
+                        }

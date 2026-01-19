@@ -140,8 +140,15 @@ namespace PkgdefLanguage
             {
                 var refTrim = reference.Text.Trim();
 
-                if (refTrim.EndsWith("$", StringComparison.Ordinal))
+                // Check if variable is properly closed with $
+                if (!refTrim.EndsWith("$", StringComparison.Ordinal))
                 {
+                    // PL007: Variable missing closing $
+                    AddError(reference, Errors.PL007);
+                }
+                else
+                {
+                    // Variable is properly formatted, check if it exists
                     var variableName = refTrim.Trim('$');
                     if (!predefinedVariables.Contains(variableName))
                     {
