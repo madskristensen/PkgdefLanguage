@@ -8,7 +8,7 @@
       <Compile Remove="C:\Users\madsk\.nuget\packages\community.visualstudio.toolkit.16\16.0.357\build\AssemblyInfo.cs" />
     </ItemGroup>-->
     <ItemGroup>
-        <PackageReference Include="Community.VisualStudio.Toolkit.17" Version="17.0.545" />
+        <PackageReference Include="Community.VisualStudio.Toolkit.17" Version="17.0.549" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
         <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
         <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
