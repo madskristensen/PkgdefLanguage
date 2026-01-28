@@ -1,10 +1,11 @@
-[marketplace]: https://marketplace.visualstudio.com/items?itemName=MadsKristensen.PkgdefLanguage
-[vsixgallery]: http://vsixgallery.com/extension/06278dd5-5d9d-4f27-a3e8-cd619b101a50/
-[repo]:https://github.com/madskristensen/PkgdefLanguage/
+[marketplace]: <https://marketplace.visualstudio.com/items?itemName=MadsKristensen.PkgdefLanguage>
+[vsixgallery]: <http://vsixgallery.com/extension/06278dd5-5d9d-4f27-a3e8-cd619b101a50/>
+[repo]:<https://github.com/madskristensen/PkgdefLanguage/>
 
 # Pkgdef Language for Visual Studio
 
 [![Build](https://github.com/madskristensen/PkgdefLanguage/actions/workflows/build.yaml/badge.svg)](https://github.com/madskristensen/PkgdefLanguage/actions/workflows/build.yaml)
+![GitHub Sponsors](https://img.shields.io/github/sponsors/madskristensen)
 
 Download this extension from the [Visual Studio Marketplace][marketplace]
 or get the [CI build][vsixgallery].
@@ -23,6 +24,7 @@ A comprehensive language service for `.pkgdef` and `.pkgundef` files that brings
 | 🔧 **Quick Fixes** | One-click fixes for common errors |
 | ✨ **Refactoring** | Sort properties and add default values |
 | 📁 **Outlining** | Collapse sections for better overview |
+| 🗺️ **Document Outline** | Navigate registry keys in the Document Outline window |
 | 📝 **Formatting** | Consistent code style with one keystroke |
 
 ## Syntax Highlighting
@@ -101,6 +103,16 @@ Collapse registry key sections to get a better overview of large documents. Each
 ![Outlining](art/outlining.png)
 
 > **Note:** Only comments starting with a semicolon (`;`) are correctly identified as comments, not those starting with `//`.
+
+## Document Outline
+
+The Document Outline window provides a hierarchical view of all registry keys in your `.pkgdef` file for quick navigation:
+
+- **View** → **Other Windows** → **Document Outline** (or `Ctrl+Alt+T`)
+- Click any registry key to jump directly to its location
+- Automatically syncs with your cursor position in the editor
+
+This is especially useful for large `.pkgdef` files with many registry entries.
 
 ## Formatting
 

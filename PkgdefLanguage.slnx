@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="benchmarks/PkgdefLanguage.Benchmarks.csproj" />
+  <Project Path="src/PkgdefLanguage.csproj" />
+  <Project Path="Test/PkgdefLanguage.Test.csproj" />
+</Solution>
