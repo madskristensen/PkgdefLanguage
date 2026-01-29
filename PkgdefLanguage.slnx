@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="benchmarks/PkgdefLanguage.Benchmarks.csproj" />
-  <Project Path="src/PkgdefLanguage.csproj" />
+  <Project Path="src/PkgdefLanguage.csproj" Id="c740dde1-7c89-42d2-ae82-dd4adcce4e81" />
   <Project Path="Test/PkgdefLanguage.Test.csproj" />
 </Solution>
