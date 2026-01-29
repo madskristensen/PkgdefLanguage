@@ -1,6 +1,9 @@
-﻿using System.Reflection;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using PkgdefLanguage;
+
+[assembly: InternalsVisibleTo("PkgdefLanguage.Test")]
 
 [assembly: AssemblyTitle(Vsix.Name)]
 [assembly: AssemblyDescription(Vsix.Description)]
